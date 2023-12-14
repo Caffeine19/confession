@@ -7,10 +7,19 @@ import CCalculatorInput from '@/components/CCalculatorInput.vue'
 import CDateInput from '@/components/CDateInput.vue'
 import CButton from '@/components/CButton.vue'
 import CDivider from '@/components/CDivider.vue'
+import CTabRadio, { type TabOption } from '@/components/CTabRadio.vue'
 
 import RouteTabGroup from './RouteTabGroup.vue'
 
 const searchKeyword = ref('')
+
+type EntryType = 'output' | 'input' | 'transfer'
+const entryTabValue = ref<EntryType>('output')
+const entryTabOptions: TabOption<EntryType>[] = [
+  { label: 'Output', value: 'output' },
+  { label: 'Input', value: 'input' },
+  { label: 'Transfer', value: 'transfer' }
+]
 </script>
 
 <template>
@@ -32,15 +41,24 @@ const searchKeyword = ref('')
 
     <div class="flex grow">
       <RouteTabGroup></RouteTabGroup>
+
       <div></div>
+
       <div class="p-6 flex flex-col grow space-y-6">
         <div class="flex space-x-3">
           <CDateInput></CDateInput>
           <CCalculatorInput class="grow"></CCalculatorInput>
           <CButton icon="ph-paper-plane" :show-label="false"></CButton>
         </div>
+
         <CDivider></CDivider>
-        <div></div>
+
+        <div class="flex">
+          <div>
+            <CTabRadio v-model:value="entryTabValue" :tab-options="entryTabOptions"></CTabRadio>
+          </div>
+          <div></div>
+        </div>
       </div>
     </div>
   </div>
