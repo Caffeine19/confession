@@ -6,7 +6,10 @@ import dayjs from 'dayjs'
 import CInput from './CInput.vue'
 
 const date = ref()
+const setDate = (newDate: string) => {
+  date.value = dayjs(newDate).format('YYYY-MM-DD')
+}
 </script>
 <template>
-  <CInput v-model:value="date" icon="ph-calendar-plus"></CInput>
+  <CInput :value="date" icon="ph-calendar-plus" @change="setDate"></CInput>
 </template>

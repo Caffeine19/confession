@@ -23,7 +23,7 @@ const calculate = (expression: string) => {
 }
 </script>
 <template>
-  <CInput icon="ph-math-operations" v-model:value="expression">
+  <CInput icon="ph-math-operations" @input="(newVal) => (expression = newVal)" :value="expression">
     <p class="dark:text-neutral-400" v-if="isExpressionValid">{{ predictedResult }}</p>
     <p class="dark:text-red-400 break-keep whitespace-nowrap" v-else>{{ predictedResult }}</p>
   </CInput>

@@ -12,7 +12,7 @@ withDefaults(
   }
 )
 
-defineEmits(['update:value'])
+defineEmits(['change', 'input'])
 </script>
 <template>
   <div
@@ -27,7 +27,9 @@ defineEmits(['update:value'])
     <input
       class="bg-transparent outline-none dark:placeholder-neutral-600 text-base font-normal w-full dark:text-neutral-200"
       :placeholder="placeholder"
-      @input="$emit('update:value', ($event.target as HTMLInputElement).value)"
+      :value="value"
+      @input="$emit('input', ($event.target as HTMLInputElement).value)"
+      @change="$emit('change', ($event.target as HTMLInputElement).value)"
     />
     <slot></slot>
   </div>
