@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+
+import { storeToRefs } from 'pinia'
 
 import CLogo from '@/components/CLogo.vue'
 import CInput from '@/components/CInput.vue'
@@ -8,18 +10,38 @@ import CDateInput from '@/components/CDateInput.vue'
 import CButton from '@/components/CButton.vue'
 import CDivider from '@/components/CDivider.vue'
 import CTabRadio, { type TabOption } from '@/components/CTabRadio.vue'
+import CCategoryIcon from '@/components/CCategoryIcon.vue'
 
 import RouteTabGroup from './RouteTabGroup.vue'
 
+import { type EntryType } from '@/types/entry'
+
+import { useCategoryStore } from '@/stores/category'
+import type { Category } from '@/types/category'
+
+const categoryStore = useCategoryStore()
+const { categoryList } = storeToRefs(categoryStore)
+onMounted(() => {
+  categoryStore.getCategoryList()
+})
+
 const searchKeyword = ref('')
 
-type EntryType = 'output' | 'input' | 'transfer'
 const entryTabValue = ref<EntryType>('output')
 const entryTabOptions: TabOption<EntryType>[] = [
   { label: 'Output', value: 'output' },
   { label: 'Input', value: 'input' },
   { label: 'Transfer', value: 'transfer' }
 ]
+
+const categoryListFilteredByEntryType = computed(() => {
+  return categoryList.value.filter((category) => category.type === entryTabValue.value)
+})
+
+const selectedCategory = ref()
+const setSelectedCategory = (category: Category) => {
+  selectedCategory.value = category
+}
 </script>
 
 <template>
@@ -35,7 +57,7 @@ const entryTabOptions: TabOption<EntryType>[] = [
       <button
         class="flex items-center justify-center dark:bg-neutral-900 p-2 rounded-lg w-fit justify-self-end"
       >
-        <i class="ph-fill ph-gear-fine dark:text-neutral-400" style="font-size: 24px"></i>
+        <i class="ph ph-gear-fine dark:text-neutral-400" style="font-size: 24px"></i>
       </button>
     </div>
 
@@ -54,8 +76,18 @@ const entryTabOptions: TabOption<EntryType>[] = [
         <CDivider></CDivider>
 
         <div class="flex">
-          <div>
+          <div class="flex flex-col space-y-6 items-center w-96">
             <CTabRadio v-model:value="entryTabValue" :tab-options="entryTabOptions"></CTabRadio>
+
+            <div class="flex gap-3 flex-wrap justify-center" v-if="entryTabValue !== 'transfer'">
+              <CCategoryIcon
+                v-for="category in categoryListFilteredByEntryType"
+                :key="category.value"
+                v-bind="category"
+                @click="setSelectedCategory(category)"
+                :activated="selectedCategory === category"
+              ></CCategoryIcon>
+            </div>
           </div>
           <div></div>
         </div>
