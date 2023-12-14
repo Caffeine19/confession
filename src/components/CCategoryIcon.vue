@@ -4,7 +4,7 @@ withDefaults(
   defineProps<
     {
       showLabel?: boolean
-      disabled: boolean
+      disabled?: boolean
       activated: boolean
     } & Category
   >(),
