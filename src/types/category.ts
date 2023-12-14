@@ -1,8 +1,4 @@
 import type { EntryType } from './entry'
+import type { Database } from './supabase'
 
-export interface Category {
-  type: Exclude<EntryType, 'transfer'>
-  icon: string
-  value: string
-  label: string
-}
+export type Category = Database['public']['Tables']['category']['Row']

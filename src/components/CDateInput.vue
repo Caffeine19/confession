@@ -7,7 +7,7 @@ import CInput from './CInput.vue'
 
 const date = ref()
 const setDate = (newDate: string) => {
-  date.value = dayjs(newDate).format('YYYY-MM-DD')
+  date.value = dayjs(newDate).format('DD-MM-YYYY')
 }
 </script>
 <template>

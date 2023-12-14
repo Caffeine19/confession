@@ -54,7 +54,7 @@ const setSelectedCategory = (category: Category) => {
         <div class="flex gap-3 flex-wrap justify-center" v-if="entryTabValue !== 'transfer'">
           <CCategoryIcon
             v-for="category in categoryListFilteredByEntryType"
-            :key="category.value"
+            :key="category.id"
             v-bind="category"
             @click="setSelectedCategory(category)"
             :activated="selectedCategory === category"
