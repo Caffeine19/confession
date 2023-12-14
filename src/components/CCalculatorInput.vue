@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+
 import { evaluate } from 'mathjs'
 
 import CInput from '@/components/CInput.vue'

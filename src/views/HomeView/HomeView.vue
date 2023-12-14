@@ -4,6 +4,9 @@ import { ref } from 'vue'
 import CLogo from '@/components/CLogo.vue'
 import CInput from '@/components/CInput.vue'
 import CCalculatorInput from '@/components/CCalculatorInput.vue'
+import CDateInput from '@/components/CDateInput.vue'
+import CButton from '@/components/CButton.vue'
+import CDivider from '@/components/CDivider.vue'
 
 import RouteTabGroup from './RouteTabGroup.vue'
 
@@ -30,10 +33,13 @@ const searchKeyword = ref('')
     <div class="flex grow">
       <RouteTabGroup></RouteTabGroup>
       <div></div>
-      <div class="p-6 flex flex-col grow">
-        <div class="">
-          <CCalculatorInput></CCalculatorInput>
+      <div class="p-6 flex flex-col grow space-y-6">
+        <div class="flex space-x-3">
+          <CDateInput></CDateInput>
+          <CCalculatorInput class="grow"></CCalculatorInput>
+          <CButton icon="ph-paper-plane" :show-label="false"></CButton>
         </div>
+        <CDivider></CDivider>
         <div></div>
       </div>
     </div>
