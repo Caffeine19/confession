@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 
 import CCalculatorInput from '@/components/CCalculatorInput.vue'
 import CDateInput from '@/components/CDateInput.vue'
@@ -36,10 +37,18 @@ const selectedCategory = ref()
 const setSelectedCategory = (category: Category) => {
   selectedCategory.value = category
 }
+
+const router = useRouter()
 </script>
 <template>
   <div class="p-6 flex flex-col grow space-y-6">
-    <div class="flex space-x-3">
+    <div class="flex space-x-3 items-center">
+      <CButton
+        icon="ph-arrow-elbow-up-left"
+        :show-label="false"
+        type="secondary"
+        @click="router.back()"
+      ></CButton>
       <CDateInput></CDateInput>
       <CCalculatorInput class="grow"></CCalculatorInput>
       <CButton icon="ph-paper-plane" :show-label="false"></CButton>

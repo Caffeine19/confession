@@ -2,10 +2,11 @@
 import { ref } from 'vue'
 import CLogo from '@/components/CLogo.vue'
 import CInput from '@/components/CInput.vue'
+import CButton from '@/components/CButton.vue'
 const searchKeyword = ref('')
 </script>
 <template>
-  <div class="border-b dark:border-neutral-800 grid grid-cols-3 px-6 py-3">
+  <div class="border-b dark:border-neutral-800 grid grid-cols-3 px-6 py-3 items-center">
     <CLogo></CLogo>
     <CInput placeholder="Quick Search" v-model:value="searchKeyword" :show-hot-key="true">
       <div class="flex items-center">
@@ -13,10 +14,6 @@ const searchKeyword = ref('')
       </div>
     </CInput>
 
-    <button
-      class="flex items-center justify-center dark:bg-neutral-900 p-2 rounded-lg w-fit justify-self-end"
-    >
-      <i class="ph ph-gear-fine dark:text-neutral-400" style="font-size: 24px"></i>
-    </button>
+    <CButton icon="ph-gear-fine" type="secondary" class="w-fit justify-self-end"></CButton>
   </div>
 </template>

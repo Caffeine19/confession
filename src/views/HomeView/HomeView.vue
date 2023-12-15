@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 
 import CDivider from '@/components/CDivider.vue'
 import CEntryList from '@/components/CEntryList.vue'
@@ -11,18 +9,10 @@ import TopBar from './TopBar.vue'
 import RouteTabGroup from './RouteTabGroup.vue'
 import StatisticPanel from './StatisticPanel.vue'
 
-import { supabase } from '@/lib/supabaseClient'
-
-const countries = ref<any>([])
-
-async function getCountries() {
-  const { data } = await supabase.from('countries').select()
-  if (data) countries.value = data
+const router = useRouter()
+const goToCreateEntry = () => {
+  router.push({ name: 'createEntry' })
 }
-
-onMounted(() => {
-  getCountries()
-})
 </script>
 
 <template>
@@ -38,8 +28,9 @@ onMounted(() => {
         <CDivider></CDivider>
         <CEntryList class="overflow-y-auto"></CEntryList>
         <CDivider></CDivider>
-        <CButton icon=" ph-plus" class="w-fit mx-auto"></CButton>
+        <CButton icon=" ph-plus" @click="goToCreateEntry" class="w-fit mx-auto"></CButton>
       </div>
+
       <RouterView></RouterView>
     </div>
   </div>
