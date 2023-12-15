@@ -101,13 +101,13 @@ const lineChartData: ComputedRef<ChartData<'line'>> = computed(() => {
     datasets: [
       {
         data: dailyStatisticList.value.map((statistic) => statistic.input),
-        borderColor: '#c5dcf8',
-        tension: 0.4
+        borderColor: '#c5dcf8'
+        // tension: 0.4
       },
       {
         data: dailyStatisticList.value.map((statistic) => statistic.output),
-        borderColor: '#ff7245',
-        tension: 0.4
+        borderColor: '#ff7245'
+        // tension: 0.4
       }
     ]
   }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRefs, nextTick, reactive, watch } from 'vue'
+import { ref, computed, toRefs } from 'vue'
 
 export interface TabOption<T> {
   label: string
