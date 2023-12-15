@@ -26,7 +26,7 @@ const goToCreateEntry = () => {
       >
         <StatisticPanel></StatisticPanel>
         <CDivider></CDivider>
-        <CEntryList class="overflow-y-auto"></CEntryList>
+        <CEntryList class="overflow-y-auto custom-scrollbar"></CEntryList>
         <CDivider></CDivider>
         <CButton icon=" ph-plus" @click="goToCreateEntry" class="w-fit mx-auto"></CButton>
       </div>
