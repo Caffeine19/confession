@@ -10,6 +10,7 @@ import CButton from '@/components/CButton.vue'
 import CDivider from '@/components/CDivider.vue'
 import CTabRadio, { type TabOption } from '@/components/CTabRadio.vue'
 import CCategoryIcon from '@/components/CCategoryIcon.vue'
+import CPropertyList from '@/components/CPropertyList.vue'
 
 import { type EntryType } from '@/types/entry'
 import type { Category } from '@/types/category'
@@ -56,7 +57,7 @@ const router = useRouter()
 
     <CDivider></CDivider>
 
-    <div class="flex">
+    <div class="flex space-x-6 items-stretch grow">
       <div class="flex flex-col space-y-6 items-center grow">
         <CTabRadio v-model:value="entryTabValue" :tab-options="entryTabOptions"></CTabRadio>
 
@@ -70,7 +71,10 @@ const router = useRouter()
           ></CCategoryIcon>
         </div>
       </div>
-      <div></div>
+
+      <CDivider direction="vertical"></CDivider>
+
+      <CPropertyList></CPropertyList>
     </div>
   </div>
 </template>

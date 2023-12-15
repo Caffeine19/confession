@@ -28,7 +28,7 @@ defineProps<{ dateGroupedEntryList: DateGroupedEntryList }>()
               ></i>
             </div>
 
-            <p class="dark:text-neutral-300 font-normal text-base">{{ entry.category?.label }}</p>
+            <p class="dark:text-neutral-200 font-normal text-base">{{ entry.category?.label }}</p>
           </div>
           <p
             class="text-base font-normal"

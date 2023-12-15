@@ -12,11 +12,8 @@ export const useEntryStore = defineStore('entry', () => {
   const getEntryList = async () => {
     const { data } = await supabase
       .from('entry')
-      .select(`id,created_at,amount,type,category (label,icon,id)`)
-
-    if (data) {
-      entryList.value = data
-    }
+      .select(`id,created_at,amount,type,property,category (label,icon,id)`)
+    entryList.value = data || []
   }
 
   //write by chatgpt,thanks

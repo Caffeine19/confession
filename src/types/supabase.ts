@@ -27,27 +27,13 @@ export interface Database {
         }
         Relationships: []
       }
-      countries: {
-        Row: {
-          id: number
-          name: string
-        }
-        Insert: {
-          id?: number
-          name: string
-        }
-        Update: {
-          id?: number
-          name?: string
-        }
-        Relationships: []
-      }
       entry: {
         Row: {
           amount: number
           category: number | null
           created_at: string
           id: number
+          property: number
           type: Database['public']['Enums']['entry_type']
         }
         Insert: {
@@ -55,6 +41,7 @@ export interface Database {
           category?: number | null
           created_at?: string
           id?: number
+          property: number
           type: Database['public']['Enums']['entry_type']
         }
         Update: {
@@ -62,6 +49,7 @@ export interface Database {
           category?: number | null
           created_at?: string
           id?: number
+          property?: number
           type?: Database['public']['Enums']['entry_type']
         }
         Relationships: [
@@ -71,8 +59,39 @@ export interface Database {
             isOneToOne: false
             referencedRelation: 'category'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_property_fkey'
+            columns: ['property']
+            isOneToOne: false
+            referencedRelation: 'property'
+            referencedColumns: ['id']
           }
         ]
+      }
+      property: {
+        Row: {
+          amount: number
+          created_at: string
+          id: number
+          label: string
+          type: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: number
+          label: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: number
+          label?: string
+          type?: string
+        }
+        Relationships: []
       }
     }
     Views: {
