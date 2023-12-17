@@ -5,7 +5,7 @@ import { computed, ref, type ComputedRef } from 'vue'
 import dayjs from 'dayjs'
 import { supabase } from '@/lib/supabaseClient'
 
-import type { DateGroupedEntryList, EntryWithCategory } from '@/types/entry'
+import type { DateGroupedEntryList, Entry, EntryWithCategory } from '@/types/entry'
 
 export const useEntryStore = defineStore('entry', () => {
   const entryList = ref<EntryWithCategory[]>([])
@@ -37,9 +37,16 @@ export const useEntryStore = defineStore('entry', () => {
     })
   })
 
+  const createEntry = async (
+    params: Pick<Entry, 'amount' | 'category' | 'property' | 'type' | 'created_at'>
+  ) => {
+    const res = await supabase.from('entry').insert(params)
+  }
+
   return {
     entryList,
     getEntryList,
-    groupedEntryListByDate
+    groupedEntryListByDate,
+    createEntry
   }
 })

@@ -5,8 +5,10 @@ import { evaluate } from 'mathjs'
 
 import CInput from '@/components/CInput.vue'
 
-const expression = ref('')
-const predictedResult = computed(() => calculate(expression.value))
+const props = defineProps<{ value: any }>()
+defineEmits(['update:value'])
+
+const predictedResult = computed(() => calculate(props.value.toString()))
 const isExpressionValid = ref(true)
 
 const calculate = (expression: string) => {
@@ -23,7 +25,11 @@ const calculate = (expression: string) => {
 }
 </script>
 <template>
-  <CInput icon="ph-math-operations" @input="(newVal) => (expression = newVal)" :value="expression">
+  <CInput
+    icon="ph-math-operations"
+    @input="(newVal) => $emit('update:value', newVal)"
+    :value="value"
+  >
     <p class="dark:text-neutral-400" v-if="isExpressionValid">{{ predictedResult }}</p>
     <p class="dark:text-red-400 break-keep whitespace-nowrap" v-else>{{ predictedResult }}</p>
   </CInput>

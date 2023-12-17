@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
+import dayjs from 'dayjs'
 
 import CCalculatorInput from '@/components/CCalculatorInput.vue'
 import CDateInput from '@/components/CDateInput.vue'
@@ -16,6 +17,7 @@ import { type EntryType } from '@/types/entry'
 import type { Category } from '@/types/category'
 
 import { useCategoryStore } from '@/stores/category'
+import { useEntryStore } from '@/stores/entry'
 
 const categoryStore = useCategoryStore()
 const { categoryList } = storeToRefs(categoryStore)
@@ -34,12 +36,31 @@ const categoryListFilteredByEntryType = computed(() => {
   return categoryList.value.filter((category) => category.type === entryTabValue.value)
 })
 
-const selectedCategory = ref()
+const selectedCategory = ref<Category>()
 const setSelectedCategory = (category: Category) => {
   selectedCategory.value = category
 }
 
 const router = useRouter()
+
+const amount = ref(0)
+const createTime = ref('')
+
+const entryStore = useEntryStore()
+const onSubmitButtonClick = async () => {
+  if (!selectedCategory.value) return
+  if (entryTabValue.value === 'transfer') return
+
+  const params = {
+    category: selectedCategory.value.id,
+    amount: amount.value * 100,
+    created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
+    type: entryTabValue.value,
+    property: 2
+  }
+  await entryStore.createEntry(params)
+  await entryStore.getEntryList()
+}
 </script>
 <template>
   <div class="p-6 flex flex-col grow space-y-6">
@@ -50,9 +71,9 @@ const router = useRouter()
         type="secondary"
         @click="router.back()"
       ></CButton>
-      <CDateInput></CDateInput>
-      <CCalculatorInput class="grow"></CCalculatorInput>
-      <CButton icon="ph-paper-plane" :show-label="false"></CButton>
+      <CDateInput v-model:value="createTime"></CDateInput>
+      <CCalculatorInput class="grow" v-model:value="amount"></CCalculatorInput>
+      <CButton icon="ph-paper-plane" :show-label="false" @click="onSubmitButtonClick"></CButton>
     </div>
 
     <CDivider></CDivider>
