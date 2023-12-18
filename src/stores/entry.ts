@@ -29,12 +29,17 @@ export const useEntryStore = defineStore('entry', () => {
       {} as Record<string, EntryWithCategory[]>
     )
 
-    return Object.entries(groupedEntryList).map(([date, entryList]) => {
-      return {
-        date,
-        entryList
-      }
-    })
+    return (
+      Object.entries(groupedEntryList)
+        .map(([date, entryList]) => {
+          return {
+            date,
+            entryList
+          }
+        })
+        //sort by date
+        .sort((prev, next) => (dayjs(prev.date).isBefore(dayjs(next.date)) ? 1 : -1))
+    )
   })
 
   const createEntry = async (
