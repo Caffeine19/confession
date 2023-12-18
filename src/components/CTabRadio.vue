@@ -6,15 +6,18 @@ export interface TabOption<T> {
   value: T
 }
 
-const props = defineProps<{ tabOptions: TabOption<any>[]; value: TabOption<any>['value'] }>()
+const props = defineProps<{
+  tabOptions: TabOption<string | number | boolean>[]
+  value: TabOption<string | number | boolean>['value']
+}>()
 const { tabOptions, value } = toRefs(props)
 
-defineEmits(['update:value'])
+defineEmits<{ 'update:value': [val: TabOption<string | number | boolean>['value']] }>()
 
 const tabRef = ref<null | HTMLElement[]>(null)
 
 const activatedTabIndex = computed(() => {
-  return tabOptions.value.findIndex((tab) => tab.value === value.value)
+  return props.tabOptions.findIndex((tab) => tab.value === props.value)
 })
 
 // const activatedTabPosition = reactive({

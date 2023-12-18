@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import CInput from './CInput.vue'
 
 defineProps<{ value: any }>()
-defineEmits(['update:value'])
+defineEmits<{ 'update:value': [val: string] }>()
 </script>
 <template>
   <CInput

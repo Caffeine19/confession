@@ -40,7 +40,18 @@ export const useEntryStore = defineStore('entry', () => {
   const createEntry = async (
     params: Pick<Entry, 'amount' | 'category' | 'property' | 'type' | 'created_at'>
   ) => {
-    const res = await supabase.from('entry').insert(params)
+    try {
+      const res = await supabase.from('entry').insert(params)
+      console.log('🚀 ~ file: entry.ts:44 ~ useEntryStore ~ res:', res)
+      const { error } = res
+      if (error) {
+        const { message, code } = error
+        throw new Error(code + ':' + message)
+      }
+    } catch (error) {
+      console.log('🚀 ~ file: entry.ts:48 ~ useEntryStore ~ error:', error)
+      throw error
+    }
   }
 
   return {

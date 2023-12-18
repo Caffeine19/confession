@@ -12,7 +12,10 @@ withDefaults(
   }
 )
 
-defineEmits(['change', 'input'])
+defineEmits<{
+  change: [val: HTMLInputElement['value']]
+  input: [val: HTMLInputElement['value']]
+}>()
 </script>
 <template>
   <div

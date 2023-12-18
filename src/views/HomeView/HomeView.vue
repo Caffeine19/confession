@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 
 import CDivider from '@/components/CDivider.vue'
@@ -8,11 +9,14 @@ import CButton from '@/components/CButton.vue'
 import TopBar from './TopBar.vue'
 import RouteTabGroup from './RouteTabGroup.vue'
 import StatisticPanel from './StatisticPanel.vue'
+import CDateInput from '@/components/CDateInput.vue'
 
 const router = useRouter()
 const goToCreateEntry = () => {
   router.push({ name: 'createEntry' })
 }
+
+const searchDate = ref('')
 </script>
 
 <template>
@@ -26,18 +30,16 @@ const goToCreateEntry = () => {
       >
         <StatisticPanel></StatisticPanel>
         <CDivider></CDivider>
+
+        <div class="flex items-center justify-between space-x-4">
+          <CDateInput :value="searchDate" class="grow"></CDateInput>
+          <CButton icon="ph-plus" @click="goToCreateEntry"></CButton>
+        </div>
+
         <CEntryList class="overflow-y-auto custom-scrollbar"></CEntryList>
-        <CDivider></CDivider>
-        <CButton icon=" ph-plus" @click="goToCreateEntry" class="w-fit mx-auto"></CButton>
       </div>
 
       <RouterView></RouterView>
     </div>
   </div>
 </template>
-
-<style scoped>
-.c-button {
-  @apply rounded-full;
-}
-</style>

@@ -13,7 +13,7 @@ const tabOptions: TabOption<number>[] = [
   { label: '6M', value: 180 },
   { label: '1Y', value: 365 }
 ]
-const value = ref<TabOption<number>>(7)
+const value = ref<TabOption<number>['value']>(7)
 </script>
 <template>
   <div class="flex flex-col items-stretch p-3 rounded-xl border dark:border-neutral-800 space-y-4">
