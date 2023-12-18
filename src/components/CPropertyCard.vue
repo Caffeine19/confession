@@ -16,7 +16,7 @@ defineEmits<{ 'property-click': [val: Property] }>()
       <div
         v-for="property in typeGroupedPropertyList.propertyList"
         :key="property.id"
-        class="flex px-3 group transition-colors"
+        class="flex px-3 group transition-colors cursor-pointer"
         :class="
           activatedPropertyId === property.id
             ? 'dark:bg-cookie-200 dark:hover:bg-cookie-100'

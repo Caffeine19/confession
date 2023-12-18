@@ -20,19 +20,16 @@ export const usePropertyStore = defineStore('property', () => {
         acc[type] = typeGroup
         return acc
       },
-      {} as Record<string, Property[]>
+      {} as Record<Property['type'], Property[]>
     )
 
     return Object.entries(groupedPropertyList).map(([type, propertyList]) => {
       return {
-        type,
+        type: type as Property['type'],
         propertyList
       }
     })
   })
 
-  const createProperty = async () => {
-    const res = await supabase.from('property').insert({ label: 'test', type: 'test' })
-  }
   return { propertyList, getPropertyList, groupedPropertyList }
 })

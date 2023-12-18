@@ -83,7 +83,7 @@ const onSubmitButtonClick = async () => {
     //验证是否选择了分类
     if (!selectedCategory.value) throw new Error('category unSelected')
     //验证是否输入了日期
-    if (createTime.value) throw new Error('createTime unSelected')
+    if (!createTime.value) throw new Error('createTime unSelected')
     //验证是否选择了资产
     if (!selectedProperty.value) throw new Error('property unSelected')
 
