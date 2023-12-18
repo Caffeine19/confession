@@ -12,6 +12,7 @@ import CDivider from '@/components/CDivider.vue'
 import CTabRadio, { type TabOption } from '@/components/CTabRadio.vue'
 import CCategoryIcon from '@/components/CCategoryIcon.vue'
 import CPropertyList from '@/components/CPropertyList.vue'
+import CInput from '@/components/CInput.vue'
 
 import { type EntryType } from '@/types/entry'
 import type { Category } from '@/types/category'
@@ -53,22 +54,24 @@ const isExpressionValid = ref(false)
 //日期
 const createTime = ref('')
 
+//备注
+const remark = ref('')
+
 const entryStore = useEntryStore()
 const onSubmitButtonClick = async () => {
   if (isExpressionValid.value === false) return //验证金额的输入是否正确
   if (!selectedCategory.value) return //验证是否选择了分类
   if (entryType.value === 'transfer') return
 
-  const params = {
-    category: selectedCategory.value.id,
-    amount: Number(calculatedAmount.value) * 100,
-    created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
-    type: entryType.value,
-    property: 2
-  }
-
   try {
-    await entryStore.createEntry(params)
+    await entryStore.createEntry({
+      category: selectedCategory.value.id,
+      amount: Number(calculatedAmount.value) * 100,
+      created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
+      type: entryType.value,
+      property: 2,
+      remark: remark.value
+    })
   } catch (error) {
     console.log('🚀 ~ file: CreateEntryView.vue:65 ~ onSubmitButtonClick ~ error:', error)
     alert(error)
@@ -79,21 +82,25 @@ const onSubmitButtonClick = async () => {
 </script>
 <template>
   <div class="p-6 flex flex-col grow space-y-6">
-    <div class="flex space-x-3 items-center">
-      <CButton
-        icon="ph-arrow-elbow-up-left"
-        :show-label="false"
-        type="secondary"
-        @click="router.back()"
-      ></CButton>
-      <CDateInput v-model:value="createTime"></CDateInput>
-      <CCalculatorInput
-        class="grow"
-        v-model:value="amount"
-        v-model:calculated-value="calculatedAmount"
-        v-model:is-expression-valid="isExpressionValid"
-      ></CCalculatorInput>
-      <CButton icon="ph-paper-plane" :show-label="false" @click="onSubmitButtonClick"></CButton>
+    <div class="space-y-3">
+      <div class="flex space-x-3 items-center">
+        <CButton
+          icon="ph-arrow-elbow-up-left"
+          :show-label="false"
+          type="secondary"
+          @click="router.back()"
+        ></CButton>
+        <CDateInput v-model:value="createTime" placeholder="Select date"></CDateInput>
+        <CCalculatorInput
+          class="grow"
+          v-model:value="amount"
+          v-model:calculated-value="calculatedAmount"
+          v-model:is-expression-valid="isExpressionValid"
+          placeholder="Input amount"
+        ></CCalculatorInput>
+        <CButton icon="ph-paper-plane" :show-label="false" @click="onSubmitButtonClick"></CButton>
+      </div>
+      <CInput v-model:value="remark" icon="ph-note" placeholder="Remark"></CInput>
     </div>
 
     <CDivider></CDivider>

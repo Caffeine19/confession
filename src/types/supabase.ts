@@ -34,6 +34,7 @@ export interface Database {
           created_at: string
           id: number
           property: number
+          remark: string | null
           type: Database['public']['Enums']['entry_type']
         }
         Insert: {
@@ -42,6 +43,7 @@ export interface Database {
           created_at?: string
           id?: number
           property: number
+          remark?: string | null
           type: Database['public']['Enums']['entry_type']
         }
         Update: {
@@ -50,6 +52,7 @@ export interface Database {
           created_at?: string
           id?: number
           property?: number
+          remark?: string | null
           type?: Database['public']['Enums']['entry_type']
         }
         Relationships: [

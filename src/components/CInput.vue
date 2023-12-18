@@ -13,6 +13,7 @@ withDefaults(
 )
 
 defineEmits<{
+  'update:value': [val: string]
   change: [val: HTMLInputElement['value']]
   input: [val: HTMLInputElement['value']]
 }>()
@@ -32,7 +33,12 @@ defineEmits<{
       :placeholder="placeholder"
       :value="value"
       @input="$emit('input', ($event.target as HTMLInputElement).value)"
-      @change="$emit('change', ($event.target as HTMLInputElement).value)"
+      @change="
+        (event) => {
+          $emit('change', (event.target as HTMLInputElement).value)
+          $emit('update:value', (event.target as HTMLInputElement).value)
+        }
+      "
     />
     <slot></slot>
   </div>

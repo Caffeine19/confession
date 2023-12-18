@@ -14,7 +14,7 @@ const calculate = (expression: string) => {
 
     const newVal = evaluate(expression)
     emits('update:isExpressionValid', true)
-    return '=' + newVal.toFixed(2).toString()
+    return newVal.toFixed(2).toString()
   } catch (error) {
     emits('update:isExpressionValid', false)
     return error
@@ -32,7 +32,7 @@ watch(
     @input="(newVal) => $emit('update:value', newVal)"
     :value="value"
   >
-    <p class="dark:text-neutral-400" v-if="isExpressionValid">{{ calculatedValue }}</p>
+    <p class="dark:text-neutral-400" v-if="isExpressionValid">{{ '=' + calculatedValue }}</p>
     <p class="dark:text-red-400 break-keep whitespace-nowrap" v-else>{{ calculatedValue }}</p>
   </CInput>
 </template>

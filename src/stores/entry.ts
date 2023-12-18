@@ -12,7 +12,7 @@ export const useEntryStore = defineStore('entry', () => {
   const getEntryList = async () => {
     const { data } = await supabase
       .from('entry')
-      .select(`id,created_at,amount,type,property,category (label,icon,id)`)
+      .select(`id,created_at,amount,type,property,remark,category (label,icon,id)`)
     entryList.value = data || []
   }
 
@@ -38,8 +38,9 @@ export const useEntryStore = defineStore('entry', () => {
   })
 
   const createEntry = async (
-    params: Pick<Entry, 'amount' | 'category' | 'property' | 'type' | 'created_at'>
+    params: Pick<Entry, 'amount' | 'category' | 'property' | 'type' | 'created_at' | 'remark'>
   ) => {
+    console.log('🚀 ~ file: entry.ts:43 ~ useEntryStore ~ params:', params)
     try {
       const res = await supabase.from('entry').insert(params)
       console.log('🚀 ~ file: entry.ts:44 ~ useEntryStore ~ res:', res)
