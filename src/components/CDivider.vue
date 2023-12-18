@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
 const props = withDefaults(
-  defineProps<{ direction?: 'vertical' | 'horizontal'; type?: 'primary' | 'secondary' }>(),
+  defineProps<{
+    direction?: 'vertical' | 'horizontal'
+    type?: 'primary' | 'secondary'
+    color?: string
+  }>(),
   {
     direction: 'horizontal',
     type: 'primary'
   }
 )
 
-const { direction, type } = toRefs(props)
+const { direction, type, color } = toRefs(props)
 
 const dividerColor = computed(() => {
+  if (color.value) return color.value
   if (type.value === 'primary') return 'dark:border-neutral-800'
   if (type.value === 'secondary') return 'dark:border-neutral-600'
   return ''

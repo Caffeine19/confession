@@ -47,7 +47,7 @@ export const useEntryStore = defineStore('entry', () => {
       const { error } = res
       if (error) {
         const { message, code } = error
-        throw new Error(code + ':' + message)
+        throw new Error(code + '~' + message)
       }
     } catch (error) {
       console.log('🚀 ~ file: entry.ts:48 ~ useEntryStore ~ error:', error)

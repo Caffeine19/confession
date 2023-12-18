@@ -20,6 +20,8 @@ import type { Category } from '@/types/category'
 import { useCategoryStore } from '@/stores/category'
 import { useEntryStore } from '@/stores/entry'
 
+import { useInjectMessenger } from '@/hooks/useMessenger'
+
 const router = useRouter()
 
 const categoryStore = useCategoryStore()
@@ -57,13 +59,17 @@ const createTime = ref('')
 //备注
 const remark = ref('')
 
+const { showMessenger } = useInjectMessenger()
+
 const entryStore = useEntryStore()
 const onSubmitButtonClick = async () => {
-  if (isExpressionValid.value === false) return //验证金额的输入是否正确
-  if (!selectedCategory.value) return //验证是否选择了分类
-  if (entryType.value === 'transfer') return
-
   try {
+    //验证金额的输入是否正确
+    if (isExpressionValid.value === false) throw new Error('amount invalid')
+    //验证是否选择了分类
+    if (!selectedCategory.value) throw new Error('category unSelected')
+    if (entryType.value === 'transfer') return
+
     await entryStore.createEntry({
       category: selectedCategory.value.id,
       amount: Number(calculatedAmount.value) * 100,
@@ -72,9 +78,9 @@ const onSubmitButtonClick = async () => {
       property: 2,
       remark: remark.value
     })
+    showMessenger({ status: true, text: 'Create entry successfully' })
   } catch (error) {
-    console.log('🚀 ~ file: CreateEntryView.vue:65 ~ onSubmitButtonClick ~ error:', error)
-    alert(error)
+    showMessenger({ status: false, text: 'Create entry failed~' + (error as Error).message })
   }
 
   await entryStore.getEntryList()
