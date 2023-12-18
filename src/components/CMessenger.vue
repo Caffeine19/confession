@@ -54,7 +54,7 @@ watch(
     </div>
   </transition>
 </template>
-<style>
+<style scoped>
 .v-enter-active,
 .v-leave-active {
   transition:
