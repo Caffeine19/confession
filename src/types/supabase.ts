@@ -75,21 +75,21 @@ export interface Database {
           created_at: string
           id: number
           label: string
-          type: string
+          type: Database['public']['Enums']['property_type']
         }
         Insert: {
           amount?: number
           created_at?: string
           id?: number
           label: string
-          type: string
+          type?: Database['public']['Enums']['property_type']
         }
         Update: {
           amount?: number
           created_at?: string
           id?: number
           label?: string
-          type?: string
+          type?: Database['public']['Enums']['property_type']
         }
         Relationships: []
       }
@@ -101,7 +101,8 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      entry_type: 'input' | 'output'
+      entry_type: 'input' | 'output' | 'transfer'
+      property_type: 'debit' | 'credit' | 'other' | 'investment'
     }
     CompositeTypes: {
       [_ in never]: never

@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 const { tabOptions, value } = toRefs(props)
 
-defineEmits<{ 'update:value': [val: TabOption<string | number | boolean>['value']] }>()
+defineEmits<{ 'update:value': [newVal: TabOption<string | number | boolean>['value']] }>()
 
 const tabRef = ref<null | HTMLElement[]>(null)
 

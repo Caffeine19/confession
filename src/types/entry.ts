@@ -1,7 +1,7 @@
 import type { Database } from './supabase'
 import type { Category } from './category'
 
-export type EntryType = Database['public']['Enums']['entry_type'] | 'transfer'
+export type EntryType = Database['public']['Enums']['entry_type']
 
 export type Entry = Database['public']['Tables']['entry']['Row']
 
