@@ -1,19 +1,31 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+
 import { RouterView, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 
 import CDivider from '@/components/CDivider.vue'
-import CEntryList from '@/components/CEntryList.vue'
 import CButton from '@/components/CButton.vue'
+import CEntryCard from '@/components/CEntryCard.vue'
+import CDateInput from '@/components/CDateInput.vue'
 
 import TopBar from './TopBar.vue'
 import RouteTabGroup from './RouteTabGroup.vue'
 import StatisticPanel from './StatisticPanel.vue'
-import CDateInput from '@/components/CDateInput.vue'
+
+import { useEntryStore } from '@/stores/entry'
+
+import type { Entry } from '@/types/entry'
+
+const entryStore = useEntryStore()
+const { groupedEntryListByDate } = storeToRefs(entryStore)
+onMounted(() => {
+  entryStore.getEntryList()
+})
 
 const router = useRouter()
-const goToCreateEntry = () => {
-  router.push({ name: 'createEntry' })
+const goToEntryDetail = (id?: Entry['id']) => {
+  router.push({ name: 'entryDetail', params: { id } })
 }
 
 const searchDate = ref('')
@@ -33,10 +45,17 @@ const searchDate = ref('')
 
         <div class="flex items-center justify-between space-x-4">
           <CDateInput :value="searchDate" class="grow"></CDateInput>
-          <CButton icon="ph-plus" @click="goToCreateEntry"></CButton>
+          <CButton icon="ph-plus" @click="goToEntryDetail"></CButton>
         </div>
 
-        <CEntryList class="overflow-y-auto custom-scrollbar"></CEntryList>
+        <div class="flex flex-col space-y-4 overflow-y-auto custom-scrollbar">
+          <CEntryCard
+            v-for="(list, index) in groupedEntryListByDate"
+            :key="index"
+            :date-grouped-entry-list="list"
+            @entry-click="(entry) => goToEntryDetail(entry.id)"
+          ></CEntryCard>
+        </div>
       </div>
 
       <RouterView></RouterView>

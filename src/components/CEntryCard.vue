@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 
-import type { DateGroupedEntryList } from '@/types/entry'
+import type { DateGroupedEntryList, EntryWithCategory } from '@/types/entry'
 
 defineProps<{ dateGroupedEntryList: DateGroupedEntryList }>()
+defineEmits<{ 'entry-click': [val: EntryWithCategory] }>()
 </script>
 <template>
   <div class="space-y-2">
@@ -14,7 +15,8 @@ defineProps<{ dateGroupedEntryList: DateGroupedEntryList }>()
       <div
         v-for="entry in dateGroupedEntryList.entryList"
         :key="entry.id"
-        class="flex px-3 group dark:hover:bg-neutral-800 transition-colors"
+        class="flex px-3 group dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+        @click="$emit('entry-click', entry)"
       >
         <div
           class="flex grow items-center justify-between py-3 border-b dark:border-neutral-800 group-last:border-b-0 group-hover:border-transparent transition-colors"

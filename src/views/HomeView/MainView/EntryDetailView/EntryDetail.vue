@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 
 import CCalculatorInput from '@/components/CCalculatorInput.vue'
@@ -25,18 +25,25 @@ import type { Property } from '@/types/property'
 import { usePropertyStore } from '@/stores/property'
 
 const router = useRouter()
+const route = useRoute()
 
 const categoryStore = useCategoryStore()
 const { categoryList } = storeToRefs(categoryStore)
 onMounted(() => {
   categoryStore.getCategoryList()
 })
+const categoryListFilteredByEntryType = computed(() => {
+  return categoryList.value.filter((category) => category.type === entryType.value)
+})
 
 const propertyStore = usePropertyStore()
-const { groupedPropertyList } = storeToRefs(propertyStore)
+const { groupedPropertyList, propertyList } = storeToRefs(propertyStore)
 onMounted(() => {
   propertyStore.getPropertyList()
 })
+
+const entryStore = useEntryStore()
+const { entryList } = storeToRefs(entryStore)
 
 //交易类型
 const entryType = ref<EntryType>('output')
@@ -45,10 +52,6 @@ const entryTypeOptions: TabOption<EntryType>[] = [
   { label: 'Input', value: 'input' },
   { label: 'Transfer', value: 'transfer' }
 ]
-
-const categoryListFilteredByEntryType = computed(() => {
-  return categoryList.value.filter((category) => category.type === entryType.value)
-})
 
 //交易类别
 const selectedCategory = ref<Category>()
@@ -75,7 +78,6 @@ const remark = ref('')
 
 const { showMessenger } = useInjectMessenger()
 
-const entryStore = useEntryStore()
 const onSubmitButtonClick = async () => {
   try {
     //验证金额的输入是否正确
@@ -104,6 +106,33 @@ const onSubmitButtonClick = async () => {
 
   await entryStore.getEntryList()
 }
+
+watch(
+  () => route.params.id,
+  (newVal) => {
+    if (!newVal) return
+
+    const entryId = Number(newVal)
+    const entry = entryList.value.find((e) => {
+      return e.id === entryId
+    })
+
+    if (!entry) return
+
+    entryType.value = entry.type
+    selectedCategory.value = categoryList.value.find(
+      (category) => category.id === entry.category?.id
+    )
+    selectedProperty.value = propertyList.value.find((property) => property.id === entry.property)
+    amount.value = (entry.amount / 100).toString()
+    calculatedAmount.value = (entry.amount / 100).toString()
+    createTime.value = entry.created_at
+    remark.value = entry.remark || ''
+  },
+  {
+    immediate: true
+  }
+)
 </script>
 <template>
   <div class="p-6 flex flex-col grow space-y-6">

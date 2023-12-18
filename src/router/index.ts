@@ -23,10 +23,9 @@ const router = createRouter({
                 import('../views/HomeView/MainView/EntryStatisticView/EntryStatisticView.vue')
             },
             {
-              path: '/home/main/createEntry',
-              name: 'createEntry',
-              component: () =>
-                import('../views/HomeView/MainView/CreateEntryView/CreateEntryView.vue')
+              path: '/home/main/entryDetail/:id?',
+              name: 'entryDetail',
+              component: () => import('../views/HomeView/MainView/EntryDetailView/EntryDetail.vue')
             }
           ]
         }
