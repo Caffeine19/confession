@@ -11,8 +11,8 @@ import CButton from '@/components/CButton.vue'
 import CDivider from '@/components/CDivider.vue'
 import CTabRadio, { type TabOption } from '@/components/CTabRadio.vue'
 import CCategoryIcon from '@/components/CCategoryIcon.vue'
-import CPropertyList from '@/components/CPropertyList.vue'
 import CInput from '@/components/CInput.vue'
+import CPropertyCard from '@/components/CPropertyCard.vue'
 
 import { type EntryType } from '@/types/entry'
 import type { Category } from '@/types/category'
@@ -21,6 +21,8 @@ import { useCategoryStore } from '@/stores/category'
 import { useEntryStore } from '@/stores/entry'
 
 import { useInjectMessenger } from '@/hooks/useMessenger'
+import type { Property } from '@/types/property'
+import { usePropertyStore } from '@/stores/property'
 
 const router = useRouter()
 
@@ -28,6 +30,12 @@ const categoryStore = useCategoryStore()
 const { categoryList } = storeToRefs(categoryStore)
 onMounted(() => {
   categoryStore.getCategoryList()
+})
+
+const propertyStore = usePropertyStore()
+const { groupedPropertyList } = storeToRefs(propertyStore)
+onMounted(() => {
+  propertyStore.getPropertyList()
 })
 
 //交易类型
@@ -46,6 +54,12 @@ const categoryListFilteredByEntryType = computed(() => {
 const selectedCategory = ref<Category>()
 const setSelectedCategory = (category: Category) => {
   selectedCategory.value = category
+}
+
+//资产
+const selectedProperty = ref<Property>()
+const setSelectedProperty = (property: Property) => {
+  selectedProperty.value = property
 }
 
 //金额
@@ -68,6 +82,11 @@ const onSubmitButtonClick = async () => {
     if (isExpressionValid.value === false) throw new Error('amount invalid')
     //验证是否选择了分类
     if (!selectedCategory.value) throw new Error('category unSelected')
+    //验证是否输入了日期
+    if (createTime.value) throw new Error('createTime unSelected')
+    //验证是否选择了资产
+    if (!selectedProperty.value) throw new Error('property unSelected')
+
     if (entryType.value === 'transfer') return
 
     await entryStore.createEntry({
@@ -75,7 +94,7 @@ const onSubmitButtonClick = async () => {
       amount: Number(calculatedAmount.value) * 100,
       created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
       type: entryType.value,
-      property: 2,
+      property: selectedProperty.value.id,
       remark: remark.value
     })
     showMessenger({ status: true, text: 'Create entry successfully' })
@@ -128,7 +147,15 @@ const onSubmitButtonClick = async () => {
 
       <CDivider direction="vertical"></CDivider>
 
-      <CPropertyList></CPropertyList>
+      <div class="flex flex-col space-y-4">
+        <CPropertyCard
+          v-for="(list, index) in groupedPropertyList"
+          :key="index"
+          :type-grouped-property-list="list"
+          @property-click="setSelectedProperty"
+          :activated-property-id="selectedProperty?.id"
+        ></CPropertyCard>
+      </div>
     </div>
   </div>
 </template>
