@@ -208,13 +208,23 @@ watch(
 )
 
 const onDeleteButtonClick = async () => {
-  if (!selectedEntry.value) return
+  if (!selectedEntry.value || !selectedProperty.value) return
+
   try {
     await entryStore.deleteEntry(selectedEntry.value.id)
-    showMessenger({ status: true, text: 'Delete entry successfully' })
+    entryStore.getEntryList()
 
+    //删除交易后，需要撤销交易对应的资产的金额
+    await propertyStore.updatePropertyAmount({
+      id: selectedEntry.value.property,
+      oldAmount: selectedProperty.value.amount,
+      changedAmount: selectedEntry.value.amount,
+      type: selectedEntry.value.type === 'input' ? 'output' : 'input'
+    })
+    propertyStore.getPropertyList()
     resetEntryDetail()
-    await entryStore.getEntryList()
+
+    showMessenger({ status: true, text: 'Delete entry successfully' })
   } catch (error) {
     showMessenger({ status: false, text: 'Delete entry failed~' + (error as Error).message })
   }
