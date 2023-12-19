@@ -14,7 +14,7 @@ import CCategoryIcon from '@/components/CCategoryIcon.vue'
 import CInput from '@/components/CInput.vue'
 import CPropertyCard from '@/components/CPropertyCard.vue'
 
-import { type EntryType, type EntryWithCategory } from '@/types/entry'
+import { type Entry, type EntryType, type EntryWithCategory } from '@/types/entry'
 import type { Category } from '@/types/category'
 
 import { useCategoryStore } from '@/stores/category'
@@ -103,36 +103,47 @@ const onSubmitButtonClick = async () => {
       property: selectedProperty.value.id,
       remark: remark.value
     })
+
+    await propertyStore.updatePropertyAmountWhenCreateEntry({
+      id: selectedProperty.value.id,
+      amount: Number(calculatedAmount.value) * 100,
+      type: entryType.value
+    })
+
     showMessenger({ status: true, text: 'Create entry successfully' })
   } catch (error) {
     showMessenger({ status: false, text: 'Create entry failed~' + (error as Error).message })
   }
 
-  await entryStore.getEntryList()
+  entryStore.getEntryList()
+  propertyStore.getPropertyList()
 }
 
 const detailId = ref()
+
+const setEntryDetail = (id: Entry['id']) => {
+  const entry = entryList.value.find((e) => {
+    return e.id === id
+  })
+
+  if (!entry) return
+
+  entryType.value = entry.type
+  selectedCategory.value = categoryList.value.find((category) => category.id === entry.category?.id)
+  selectedProperty.value = propertyList.value.find((property) => property.id === entry.property)
+  amount.value = (entry.amount / 100).toString()
+  calculatedAmount.value = (entry.amount / 100).toString()
+  createTime.value = entry.created_at
+  remark.value = entry.remark || ''
+}
+
 watch(
   () => route.params.id,
   (newVal) => {
     if (!newVal) return
-
     detailId.value = Number(newVal)
-    const entry = entryList.value.find((e) => {
-      return e.id === detailId.value
-    })
 
-    if (!entry) return
-
-    entryType.value = entry.type
-    selectedCategory.value = categoryList.value.find(
-      (category) => category.id === entry.category?.id
-    )
-    selectedProperty.value = propertyList.value.find((property) => property.id === entry.property)
-    amount.value = (entry.amount / 100).toString()
-    calculatedAmount.value = (entry.amount / 100).toString()
-    createTime.value = entry.created_at
-    remark.value = entry.remark || ''
+    setEntryDetail(detailId.value)
   },
   {
     immediate: true
