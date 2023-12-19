@@ -60,10 +60,26 @@ export const useEntryStore = defineStore('entry', () => {
     }
   }
 
+  const deleteEntry = async (id: Entry['id']) => {
+    try {
+      const res = await supabase.from('entry').delete().eq('id', id)
+      console.log('🚀 ~ file: entry.ts:66 ~ deleteEntry ~ res:', res)
+      const { error } = res
+      if (error) {
+        const { message, code } = error
+        throw new Error(code + '~' + message)
+      }
+    } catch (error) {
+      console.log('🚀 ~ file: entry.ts:67 ~ deleteEntry ~ error:', error)
+      throw error
+    }
+  }
+
   return {
     entryList,
     getEntryList,
     groupedEntryListByDate,
-    createEntry
+    createEntry,
+    deleteEntry
   }
 })

@@ -14,7 +14,7 @@ import CCategoryIcon from '@/components/CCategoryIcon.vue'
 import CInput from '@/components/CInput.vue'
 import CPropertyCard from '@/components/CPropertyCard.vue'
 
-import { type EntryType } from '@/types/entry'
+import { type EntryType, type EntryWithCategory } from '@/types/entry'
 import type { Category } from '@/types/category'
 
 import { useCategoryStore } from '@/stores/category'
@@ -26,6 +26,10 @@ import { usePropertyStore } from '@/stores/property'
 
 const router = useRouter()
 const route = useRoute()
+
+const goToEntryStatistics = () => {
+  router.push({ name: 'entryStatistic' })
+}
 
 const categoryStore = useCategoryStore()
 const { categoryList } = storeToRefs(categoryStore)
@@ -107,14 +111,15 @@ const onSubmitButtonClick = async () => {
   await entryStore.getEntryList()
 }
 
+const detailId = ref()
 watch(
   () => route.params.id,
   (newVal) => {
     if (!newVal) return
 
-    const entryId = Number(newVal)
+    detailId.value = Number(newVal)
     const entry = entryList.value.find((e) => {
-      return e.id === entryId
+      return e.id === detailId.value
     })
 
     if (!entry) return
@@ -133,6 +138,31 @@ watch(
     immediate: true
   }
 )
+
+const resetEntryDetail = () => {
+  detailId.value = undefined
+
+  entryType.value = 'output'
+  selectedCategory.value = undefined
+  selectedProperty.value = undefined
+  amount.value = ''
+  calculatedAmount.value = ''
+  createTime.value = ''
+  remark.value = ''
+}
+
+const onDeleteButtonClick = async () => {
+  if (!detailId.value) return
+  try {
+    await entryStore.deleteEntry(detailId.value)
+    showMessenger({ status: true, text: 'Delete entry successfully' })
+
+    resetEntryDetail()
+    await entryStore.getEntryList()
+  } catch (error) {
+    showMessenger({ status: false, text: 'Delete entry failed~' + (error as Error).message })
+  }
+}
 </script>
 <template>
   <div class="p-6 flex flex-col grow space-y-6">
@@ -142,7 +172,7 @@ watch(
           icon="ph-arrow-elbow-up-left"
           :show-label="false"
           type="secondary"
-          @click="router.back()"
+          @click="goToEntryStatistics"
         ></CButton>
         <CDateInput v-model:value="createTime" placeholder="Select date"></CDateInput>
         <CCalculatorInput
@@ -154,7 +184,16 @@ watch(
         ></CCalculatorInput>
         <CButton icon="ph-paper-plane" :show-label="false" @click="onSubmitButtonClick"></CButton>
       </div>
-      <CInput v-model:value="remark" icon="ph-note" placeholder="Remark"></CInput>
+      <div class="flex items-center space-x-3">
+        <CButton
+          icon="ph-trash"
+          :show-label="true"
+          label="Delete"
+          @click="onDeleteButtonClick"
+          type="secondary"
+        ></CButton>
+        <CInput v-model:value="remark" icon="ph-note" placeholder="Remark" class="grow"></CInput>
+      </div>
     </div>
 
     <CDivider></CDivider>
