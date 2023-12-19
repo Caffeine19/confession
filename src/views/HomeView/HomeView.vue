@@ -15,7 +15,7 @@ import StatisticPanel from './StatisticPanel.vue'
 
 import { useEntryStore } from '@/stores/entry'
 
-import type { Entry } from '@/types/entry'
+import type { EntryWithCategory } from '@/types/entry'
 
 const entryStore = useEntryStore()
 const { groupedEntryListByDate } = storeToRefs(entryStore)
@@ -24,8 +24,9 @@ onMounted(() => {
 })
 
 const router = useRouter()
-const goToEntryDetail = (id?: Entry['id']) => {
-  router.push({ name: 'entryDetail', params: { id } })
+const goToEntryDetail = (entry?: EntryWithCategory) => {
+  router.push({ name: 'entryDetail', params: { id: entry?.id } })
+  entryStore.setSelectedEntry(entry)
 }
 
 const searchDate = ref('')
@@ -53,7 +54,7 @@ const searchDate = ref('')
             v-for="(list, index) in groupedEntryListByDate"
             :key="index"
             :date-grouped-entry-list="list"
-            @entry-click="(entry) => goToEntryDetail(entry.id)"
+            @entry-click="(entry) => goToEntryDetail(entry)"
           ></CEntryCard>
         </div>
       </div>

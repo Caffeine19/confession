@@ -35,19 +35,30 @@ export const usePropertyStore = defineStore('property', () => {
 
   const updatePropertyAmount = async ({
     id,
-    amount,
+    oldAmount,
+    changedAmount,
     type
-  }: Pick<Property, 'id' | 'amount'> & Pick<Entry, 'type'>) => {
+  }: {
+    id: Property['id']
+    oldAmount: Property['amount']
+    changedAmount: Entry['amount']
+    type: Entry['type']
+  }) => {
     try {
-      const oldVal = propertyList.value.find((property) => property.id === id)?.amount || 0
-      const newVal = oldVal + (type === 'input' ? amount : -amount)
+      const newAmount = oldAmount + (type === 'input' ? changedAmount : -changedAmount)
 
-      const res = await supabase.from('property').update({ amount: newVal }).match({ id })
-      const { error } = res
+      const res = await supabase
+        .from('property')
+        .update({ amount: newAmount })
+        .match({ id })
+        .select('amount')
+      const { error, data } = res
       if (error) {
         const { message, code } = error
         throw new Error(code + '~' + message)
       }
+
+      return data
     } catch (error) {
       console.log('🚀 ~ file: property.ts:38 ~ updatePropertyAmount ~ error:', error)
       throw error

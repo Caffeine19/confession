@@ -14,7 +14,7 @@ import CCategoryIcon from '@/components/CCategoryIcon.vue'
 import CInput from '@/components/CInput.vue'
 import CPropertyCard from '@/components/CPropertyCard.vue'
 
-import { type Entry, type EntryType, type EntryWithCategory } from '@/types/entry'
+import { type EntryType } from '@/types/entry'
 import type { Category } from '@/types/category'
 
 import { useCategoryStore } from '@/stores/category'
@@ -47,7 +47,7 @@ onMounted(() => {
 })
 
 const entryStore = useEntryStore()
-const { entryList } = storeToRefs(entryStore)
+const { selectedEntry } = storeToRefs(entryStore)
 
 //交易类型
 const entryType = ref<EntryType>('output')
@@ -108,17 +108,24 @@ const onSubmitButtonClick = async () => {
       })
 
       //反转上一次的结果
-      await propertyStore.updatePropertyAmount({
+      const [{ amount: UpdatedAmount }] = await propertyStore.updatePropertyAmount({
         id: selectedEntry.value.property,
-        amount: selectedEntry.value.amount,
+        oldAmount: selectedProperty.value.amount,
+        changedAmount: selectedEntry.value.amount,
         type: selectedEntry.value.type === 'input' ? 'output' : 'input'
       })
-      await propertyStore.getPropertyList()
 
       //添加新一次的结果
       await propertyStore.updatePropertyAmount({
         id: selectedProperty.value.id,
-        amount: Number(calculatedAmount.value) * 100,
+
+        //如果选择的资产和上一次的资产相同，那么就用修改反转后的上次资产的金额，否则就用现在新选中的资产的金额
+        oldAmount:
+          selectedEntry.value.property === selectedProperty.value.id
+            ? UpdatedAmount
+            : selectedProperty.value.amount,
+
+        changedAmount: Number(calculatedAmount.value) * 100,
         type: entryType.value
       })
       propertyStore.getPropertyList()
@@ -136,7 +143,8 @@ const onSubmitButtonClick = async () => {
 
       await propertyStore.updatePropertyAmount({
         id: selectedProperty.value.id,
-        amount: Number(calculatedAmount.value) * 100,
+        oldAmount: selectedProperty.value.amount,
+        changedAmount: Number(calculatedAmount.value) * 100,
         type: entryType.value
       })
 
@@ -156,24 +164,20 @@ const onSubmitButtonClick = async () => {
   }
 }
 
-const selectedEntry = ref<EntryWithCategory>()
+const setEntryDetail = () => {
+  if (!selectedEntry.value) return
 
-const setEntryDetail = (id: Entry['id']) => {
-  const entry = entryList.value.find((e) => {
-    return e.id === id
-  })
-
-  if (!entry) return
-
-  selectedEntry.value = entry
-
-  entryType.value = entry.type
-  selectedCategory.value = categoryList.value.find((category) => category.id === entry.category?.id)
-  selectedProperty.value = propertyList.value.find((property) => property.id === entry.property)
-  amount.value = (entry.amount / 100).toString()
-  calculatedAmount.value = (entry.amount / 100).toString()
-  createTime.value = entry.created_at
-  remark.value = entry.remark || ''
+  entryType.value = selectedEntry.value.type
+  selectedCategory.value = categoryList.value.find(
+    (category) => category.id === selectedEntry.value?.category?.id
+  )
+  selectedProperty.value = propertyList.value.find(
+    (property) => property.id === selectedEntry.value?.property
+  )
+  amount.value = (selectedEntry.value.amount / 100).toString()
+  calculatedAmount.value = (selectedEntry.value.amount / 100).toString()
+  createTime.value = selectedEntry.value.created_at
+  remark.value = selectedEntry.value.remark || ''
 }
 
 const resetEntryDetail = () => {
@@ -193,7 +197,7 @@ watch(
   (newVal) => {
     console.log('🚀 ~ file: EntryDetail.vue:181 ~ newVal:', newVal)
     if (newVal) {
-      setEntryDetail(Number(newVal))
+      setEntryDetail()
     } else {
       resetEntryDetail()
     }
@@ -243,6 +247,7 @@ const onDeleteButtonClick = async () => {
           label="Delete"
           @click="onDeleteButtonClick"
           type="secondary"
+          v-if="selectedEntry"
         ></CButton>
         <CInput v-model:value="remark" icon="ph-note" placeholder="Remark" class="grow"></CInput>
       </div>

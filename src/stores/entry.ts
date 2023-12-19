@@ -42,6 +42,11 @@ export const useEntryStore = defineStore('entry', () => {
     )
   })
 
+  const selectedEntry = ref<EntryWithCategory | undefined>()
+  const setSelectedEntry = (entry: EntryWithCategory | undefined) => {
+    selectedEntry.value = entry
+  }
+
   const createEntry = async (
     params: Pick<Entry, 'amount' | 'category' | 'property' | 'type' | 'created_at' | 'remark'>
   ) => {
@@ -104,6 +109,8 @@ export const useEntryStore = defineStore('entry', () => {
     entryList,
     getEntryList,
     groupedEntryListByDate,
+    selectedEntry,
+    setSelectedEntry,
     createEntry,
     deleteEntry,
     updateEntry
