@@ -95,31 +95,68 @@ const onSubmitButtonClick = async () => {
 
     if (entryType.value === 'transfer') return
 
-    await entryStore.createEntry({
-      category: selectedCategory.value.id,
-      amount: Number(calculatedAmount.value) * 100,
-      created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
-      type: entryType.value,
-      property: selectedProperty.value.id,
-      remark: remark.value
-    })
+    if (selectedEntry.value) {
+      await entryStore.updateEntry({
+        id: selectedEntry.value.id,
 
-    await propertyStore.updatePropertyAmountWhenCreateEntry({
-      id: selectedProperty.value.id,
-      amount: Number(calculatedAmount.value) * 100,
-      type: entryType.value
-    })
+        category: selectedCategory.value.id,
+        amount: Number(calculatedAmount.value) * 100,
+        created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
+        type: entryType.value,
+        property: selectedProperty.value.id,
+        remark: remark.value
+      })
 
-    showMessenger({ status: true, text: 'Create entry successfully' })
+      //反转上一次的结果
+      await propertyStore.updatePropertyAmount({
+        id: selectedEntry.value.property,
+        amount: selectedEntry.value.amount,
+        type: selectedEntry.value.type === 'input' ? 'output' : 'input'
+      })
+      await propertyStore.getPropertyList()
+
+      //添加新一次的结果
+      await propertyStore.updatePropertyAmount({
+        id: selectedProperty.value.id,
+        amount: Number(calculatedAmount.value) * 100,
+        type: entryType.value
+      })
+      propertyStore.getPropertyList()
+
+      entryStore.getEntryList()
+    } else {
+      await entryStore.createEntry({
+        category: selectedCategory.value.id,
+        amount: Number(calculatedAmount.value) * 100,
+        created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
+        type: entryType.value,
+        property: selectedProperty.value.id,
+        remark: remark.value
+      })
+
+      await propertyStore.updatePropertyAmount({
+        id: selectedProperty.value.id,
+        amount: Number(calculatedAmount.value) * 100,
+        type: entryType.value
+      })
+
+      entryStore.getEntryList()
+      propertyStore.getPropertyList()
+    }
+
+    showMessenger({
+      status: true,
+      text: `${selectedEntry.value ? 'Update' : 'Create'} entry successfully`
+    })
   } catch (error) {
-    showMessenger({ status: false, text: 'Create entry failed~' + (error as Error).message })
+    showMessenger({
+      status: false,
+      text: `${selectedEntry.value ? 'Update' : 'Create'} entry failed~` + (error as Error).message
+    })
   }
-
-  entryStore.getEntryList()
-  propertyStore.getPropertyList()
 }
 
-const detailId = ref()
+const selectedEntry = ref<EntryWithCategory>()
 
 const setEntryDetail = (id: Entry['id']) => {
   const entry = entryList.value.find((e) => {
@@ -127,6 +164,8 @@ const setEntryDetail = (id: Entry['id']) => {
   })
 
   if (!entry) return
+
+  selectedEntry.value = entry
 
   entryType.value = entry.type
   selectedCategory.value = categoryList.value.find((category) => category.id === entry.category?.id)
@@ -137,21 +176,8 @@ const setEntryDetail = (id: Entry['id']) => {
   remark.value = entry.remark || ''
 }
 
-watch(
-  () => route.params.id,
-  (newVal) => {
-    if (!newVal) return
-    detailId.value = Number(newVal)
-
-    setEntryDetail(detailId.value)
-  },
-  {
-    immediate: true
-  }
-)
-
 const resetEntryDetail = () => {
-  detailId.value = undefined
+  selectedEntry.value = undefined
 
   entryType.value = 'output'
   selectedCategory.value = undefined
@@ -162,10 +188,25 @@ const resetEntryDetail = () => {
   remark.value = ''
 }
 
+watch(
+  () => route.params.id,
+  (newVal) => {
+    console.log('🚀 ~ file: EntryDetail.vue:181 ~ newVal:', newVal)
+    if (newVal) {
+      setEntryDetail(Number(newVal))
+    } else {
+      resetEntryDetail()
+    }
+  },
+  {
+    immediate: true
+  }
+)
+
 const onDeleteButtonClick = async () => {
-  if (!detailId.value) return
+  if (!selectedEntry.value) return
   try {
-    await entryStore.deleteEntry(detailId.value)
+    await entryStore.deleteEntry(selectedEntry.value.id)
     showMessenger({ status: true, text: 'Delete entry successfully' })
 
     resetEntryDetail()

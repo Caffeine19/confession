@@ -33,16 +33,16 @@ export const usePropertyStore = defineStore('property', () => {
     })
   })
 
-  const updatePropertyAmountWhenCreateEntry = async ({
+  const updatePropertyAmount = async ({
     id,
     amount,
     type
   }: Pick<Property, 'id' | 'amount'> & Pick<Entry, 'type'>) => {
     try {
-      const oldAmount = propertyList.value.find((property) => property.id === id)?.amount || 0
-      const newAmount = oldAmount + (type === 'input' ? amount : -amount)
+      const oldVal = propertyList.value.find((property) => property.id === id)?.amount || 0
+      const newVal = oldVal + (type === 'input' ? amount : -amount)
 
-      const res = await supabase.from('property').update({ amount: newAmount }).match({ id })
+      const res = await supabase.from('property').update({ amount: newVal }).match({ id })
       const { error } = res
       if (error) {
         const { message, code } = error
@@ -54,5 +54,5 @@ export const usePropertyStore = defineStore('property', () => {
     }
   }
 
-  return { propertyList, getPropertyList, groupedPropertyList, updatePropertyAmountWhenCreateEntry }
+  return { propertyList, getPropertyList, groupedPropertyList, updatePropertyAmount }
 })

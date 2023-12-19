@@ -74,11 +74,38 @@ export const useEntryStore = defineStore('entry', () => {
     }
   }
 
+  const updateEntry = async ({
+    amount,
+    remark,
+    category,
+    property,
+    type,
+    created_at,
+    id
+  }: Pick<Entry, 'id' | 'amount' | 'remark' | 'category' | 'property' | 'type' | 'created_at'>) => {
+    try {
+      const res = await supabase
+        .from('entry')
+        .update({ amount, remark, category, property, type, created_at })
+        .match({ id })
+      console.log('🚀 ~ file: entry.ts:91 ~ useEntryStore ~ res:', res)
+      const { error } = res
+      if (error) {
+        const { message, code } = error
+        throw new Error(code + '~' + message)
+      }
+    } catch (error) {
+      console.log('🚀 ~ file: entry.ts:92 ~ useEntryStore ~ error:', error)
+      throw error
+    }
+  }
+
   return {
     entryList,
     getEntryList,
     groupedEntryListByDate,
     createEntry,
-    deleteEntry
+    deleteEntry,
+    updateEntry
   }
 })
