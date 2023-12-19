@@ -23,7 +23,10 @@ const calculate = (expression: string) => {
 
 watch(
   () => props.value,
-  () => emits('update:calculatedValue', calculate(props.value))
+  () => emits('update:calculatedValue', calculate(props.value)),
+  {
+    immediate: true
+  }
 )
 </script>
 <template>
