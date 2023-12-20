@@ -13,6 +13,18 @@ export const usePropertyStore = defineStore('property', () => {
     propertyList.value = data || []
   }
 
+  const order: Record<Property['type'], number> = {
+    credit: 1,
+    debit: 2,
+    investment: 3,
+    other: 4
+  }
+  const sortPropertyListByType = (list: TypeGroupedPropertyList[]) => {
+    return list.sort((prev, next) => {
+      return order[prev.type] - order[next.type]
+    })
+  }
+
   const groupedPropertyList: ComputedRef<TypeGroupedPropertyList[]> = computed(() => {
     const groupedPropertyList = propertyList.value.reduce(
       (acc, property) => {
@@ -25,12 +37,14 @@ export const usePropertyStore = defineStore('property', () => {
       {} as Record<Property['type'], Property[]>
     )
 
-    return Object.entries(groupedPropertyList).map(([type, propertyList]) => {
-      return {
-        type: type as Property['type'],
-        propertyList
-      }
-    })
+    return sortPropertyListByType(
+      Object.entries(groupedPropertyList).map(([type, propertyList]) => {
+        return {
+          type: type as Property['type'],
+          propertyList
+        }
+      })
+    )
   })
 
   const updatePropertyAmount = async ({

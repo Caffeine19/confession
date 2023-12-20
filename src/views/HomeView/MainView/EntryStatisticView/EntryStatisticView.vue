@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type ComputedRef } from 'vue'
+import { onMounted, computed, type ComputedRef, ref } from 'vue'
 
 import { storeToRefs } from 'pinia'
 import {
@@ -10,7 +10,9 @@ import {
   CategoryScale,
   PointElement,
   LinearScale,
-  type ChartData
+  Filler,
+  type ChartData,
+  type ChartArea
 } from 'chart.js'
 import { Bar, Line } from 'vue-chartjs'
 import dayjs from 'dayjs'
@@ -20,7 +22,7 @@ import CChartContainer from '@/components/CChartContainer.vue'
 
 import { useEntryStore } from '@/stores/entry'
 
-Chart.register(Tooltip, BarElement, CategoryScale, LinearScale, PointElement, LineElement)
+Chart.register(Tooltip, BarElement, CategoryScale, LinearScale, PointElement, LineElement, Filler)
 
 const entryStore = useEntryStore()
 const { groupedEntryListByDate } = storeToRefs(entryStore)
@@ -101,13 +103,44 @@ const lineChartData: ComputedRef<ChartData<'line'>> = computed(() => {
     datasets: [
       {
         data: dailyStatisticList.value.map((statistic) => statistic.input),
-        borderColor: '#c5dcf8'
+        borderColor: '#c5dcf8',
         // tension: 0.4
+
+        backgroundColor: (ctx) => {
+          const chart = ctx.chart
+          const { ctx: chartCtx, chartArea } = chart
+          if (!chartArea) {
+            // This case happens on initial chart load
+            return
+          }
+          return getGradient(
+            chartCtx,
+            chartArea,
+            'rgba(157, 198, 243, 0.8)',
+            'rgba(157, 198, 243, 0.1)'
+          )
+        },
+        fill: true
       },
       {
         data: dailyStatisticList.value.map((statistic) => statistic.output),
-        borderColor: '#ff7245'
-        // tension: 0.4
+        borderColor: '#ff7245',
+
+        backgroundColor: (ctx) => {
+          const chart = ctx.chart
+          const { ctx: chartCtx, chartArea } = chart
+          if (!chartArea) {
+            // This case happens on initial chart load
+            return
+          }
+          return getGradient(
+            chartCtx,
+            chartArea,
+            'rgba(255, 114, 69, 0.8)',
+            'rgba(255, 114, 69, 0.1)'
+          )
+        },
+        fill: true
       }
     ]
   }
@@ -127,6 +160,25 @@ const lineChartOptions = {
       grid: { display: false }
     }
   }
+}
+
+const getGradient = (
+  ctx: CanvasRenderingContext2D,
+  chartArea: ChartArea,
+  beginColor: string,
+  endColor: string
+) => {
+  let width, height, gradient
+  const chartWidth = chartArea.right - chartArea.left
+  const chartHeight = chartArea.bottom - chartArea.top
+  if (!gradient || width !== chartWidth || height !== chartHeight) {
+    width = chartWidth
+    height = chartHeight
+    gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
+    gradient.addColorStop(0, beginColor)
+    gradient.addColorStop(0.8, endColor)
+  }
+  return gradient
 }
 </script>
 <template>

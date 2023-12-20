@@ -81,7 +81,6 @@ const createTime = ref('')
 const remark = ref('')
 
 const { showMessenger } = useInjectMessenger()
-
 const onSubmitButtonClick = async () => {
   try {
     //验证金额的输入是否正确
@@ -106,6 +105,7 @@ const onSubmitButtonClick = async () => {
         property: selectedProperty.value.id,
         remark: remark.value
       })
+      entryStore.getEntryList()
 
       //反转上一次的结果
       const [{ amount: UpdatedAmount }] = await propertyStore.updatePropertyAmount({
@@ -129,8 +129,6 @@ const onSubmitButtonClick = async () => {
         type: entryType.value
       })
       propertyStore.getPropertyList()
-
-      entryStore.getEntryList()
     } else {
       await entryStore.createEntry({
         category: selectedCategory.value.id,
@@ -140,6 +138,7 @@ const onSubmitButtonClick = async () => {
         property: selectedProperty.value.id,
         remark: remark.value
       })
+      entryStore.getEntryList()
 
       await propertyStore.updatePropertyAmount({
         id: selectedProperty.value.id,
@@ -147,8 +146,6 @@ const onSubmitButtonClick = async () => {
         changedAmount: Number(calculatedAmount.value) * 100,
         type: entryType.value
       })
-
-      entryStore.getEntryList()
       propertyStore.getPropertyList()
     }
 
@@ -176,7 +173,7 @@ const setEntryDetail = () => {
   )
   amount.value = (selectedEntry.value.amount / 100).toString()
   calculatedAmount.value = (selectedEntry.value.amount / 100).toString()
-  createTime.value = selectedEntry.value.created_at
+  createTime.value = dayjs(selectedEntry.value.created_at).format('YYYY-MM-DD')
   remark.value = selectedEntry.value.remark || ''
 }
 
@@ -199,6 +196,7 @@ watch(
     if (newVal) {
       setEntryDetail()
     } else {
+      //可能从详情页跳转到新增页，所以需要重置
       resetEntryDetail()
     }
   },
