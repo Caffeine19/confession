@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, type ComputedRef, ref } from 'vue'
-
+import { computed, type ComputedRef } from 'vue'
 import { storeToRefs } from 'pinia'
 import {
   Chart,
@@ -11,24 +10,38 @@ import {
   PointElement,
   LinearScale,
   Filler,
+  ArcElement,
+  Legend,
   type ChartData,
-  type ChartArea
+  type ChartArea,
+  type ChartOptions
 } from 'chart.js'
-import { Bar, Line } from 'vue-chartjs'
+import { Bar, Line, Doughnut } from 'vue-chartjs'
 import dayjs from 'dayjs'
 
 import CDivider from '@/components/CDivider.vue'
 import CChartContainer from '@/components/CChartContainer.vue'
 
 import { useEntryStore } from '@/stores/entry'
+import type { EntryWithCategory } from '@/types/entry'
 
-Chart.register(Tooltip, BarElement, CategoryScale, LinearScale, PointElement, LineElement, Filler)
+Chart.register(
+  Tooltip,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  ArcElement,
+  Legend
+)
 
 const entryStore = useEntryStore()
-const { groupedEntryListByDate } = storeToRefs(entryStore)
+const { groupedEntryListByDate, entryList } = storeToRefs(entryStore)
 
 //helped by chatgpt,thanks
-const dailyStatisticList = computed(() => {
+const statisticListGroupedByDate = computed(() => {
   return groupedEntryListByDate.value.map((group) => {
     const input = group.entryList.reduce((acc, entry) => {
       if (entry.type === 'input') {
@@ -54,16 +67,18 @@ const dailyStatisticList = computed(() => {
 //helped by chatgpt,thanks
 const barChartData: ComputedRef<ChartData<'bar'>> = computed(() => {
   const data: ChartData<'bar'> = {
-    labels: dailyStatisticList.value.map((statistic) => dayjs(statistic.date).format('MM-DD')),
+    labels: statisticListGroupedByDate.value.map((statistic) =>
+      dayjs(statistic.date).format('MM-DD')
+    ),
     datasets: [
       {
-        data: dailyStatisticList.value.map((statistic) => statistic.input),
+        data: statisticListGroupedByDate.value.map((statistic) => statistic.input),
         backgroundColor: '#c5dcf8',
         barPercentage: 0.2,
         minBarLength: 5
       },
       {
-        data: dailyStatisticList.value.map((statistic) => statistic.output),
+        data: statisticListGroupedByDate.value.map((statistic) => statistic.output),
         backgroundColor: '#ff7245',
         barPercentage: 0.2,
         minBarLength: 5
@@ -73,14 +88,13 @@ const barChartData: ComputedRef<ChartData<'bar'>> = computed(() => {
   return data
 })
 
-const barChartOptions = {
+const barChartOptions: ChartOptions<'bar'> = {
   responsive: true,
   maintainAspectRatio: false,
   scales: {
     y: {
       ticks: {
         color: '#A3A3A3',
-        beginAtZero: true,
         font: { size: 14 },
         maxTicksLimit: 6
       },
@@ -89,20 +103,26 @@ const barChartOptions = {
     x: {
       ticks: {
         color: '#A3A3A3',
-        beginAtZero: true,
         font: { size: 14 }
       },
       grid: { display: false }
+    }
+  },
+  plugins: {
+    legend: {
+      display: false
     }
   }
 }
 
 const lineChartData: ComputedRef<ChartData<'line'>> = computed(() => {
   const data: ChartData<'line'> = {
-    labels: dailyStatisticList.value.map((statistic) => dayjs(statistic.date).format('MM-DD')),
+    labels: statisticListGroupedByDate.value.map((statistic) =>
+      dayjs(statistic.date).format('MM-DD')
+    ),
     datasets: [
       {
-        data: dailyStatisticList.value.map((statistic) => statistic.input),
+        data: statisticListGroupedByDate.value.map((statistic) => statistic.input),
         borderColor: '#c5dcf8',
         // tension: 0.4
 
@@ -123,7 +143,7 @@ const lineChartData: ComputedRef<ChartData<'line'>> = computed(() => {
         fill: true
       },
       {
-        data: dailyStatisticList.value.map((statistic) => statistic.output),
+        data: statisticListGroupedByDate.value.map((statistic) => statistic.output),
         borderColor: '#ff7245',
 
         backgroundColor: (ctx) => {
@@ -147,17 +167,22 @@ const lineChartData: ComputedRef<ChartData<'line'>> = computed(() => {
   return data
 })
 
-const lineChartOptions = {
+const lineChartOptions: ChartOptions<'line'> = {
   responsive: true,
   maintainAspectRatio: false,
   scales: {
     y: {
-      ticks: { color: '#A3A3A3', beginAtZero: true, font: { size: 14 }, maxTicksLimit: 6 },
+      ticks: { color: '#A3A3A3', font: { size: 14 }, maxTicksLimit: 6 },
       grid: { display: false }
     },
     x: {
-      ticks: { color: '#A3A3A3', beginAtZero: true, font: { size: 14 } },
+      ticks: { color: '#A3A3A3', font: { size: 14 } },
       grid: { display: false }
+    }
+  },
+  plugins: {
+    legend: {
+      display: false
     }
   }
 }
@@ -180,20 +205,151 @@ const getGradient = (
   }
   return gradient
 }
+
+const groupEntryListByCategory = (list: EntryWithCategory[]) => {
+  return list.reduce(
+    (acc, entry) => {
+      const category = entry.category
+      if (!category) {
+        return acc
+      }
+      const index = acc.findIndex((statistic) => statistic.category?.id === category.id)
+      if (index === -1) {
+        acc.push({
+          category,
+          input: entry.type === 'input' ? entry.amount : 0,
+          output: entry.type === 'output' ? entry.amount : 0
+        })
+      } else {
+        if (entry.type === 'input') {
+          acc[index].input += entry.amount
+        } else {
+          acc[index].output += entry.amount
+        }
+      }
+      return acc
+    },
+    [] as { category: EntryWithCategory['category']; input: number; output: number }[]
+  )
+}
+
+const pieChartData: ComputedRef<ChartData<'doughnut'>[]> = computed(() => {
+  const input: ChartData<'doughnut'> = {
+    labels: groupEntryListByCategory(entryList.value.filter((entry) => entry.type === 'input')).map(
+      (statistic) => statistic.category?.label
+    ),
+    datasets: [
+      {
+        data: groupEntryListByCategory(
+          entryList.value.filter((entry) => entry.type === 'input')
+        ).map((statistic) => statistic.input),
+        backgroundColor: [
+          '#deeafb',
+          '#c5dcf8',
+          '#9dc6f3',
+          '#6fa8eb',
+          '#4d87e4',
+          '#386bd8',
+          '#2f57c6',
+          '#2c48a1',
+          '#283f80',
+          '#1d284e'
+        ],
+        borderColor: 'transparent'
+      }
+      // {
+      //   data: statisticListGroupedByCategory.value.map((statistic) => statistic.output),
+      //   backgroundColor: '#ff7245'
+      // }
+    ]
+  }
+  const output: ChartData<'doughnut'> = {
+    labels: groupEntryListByCategory(
+      entryList.value.filter((entry) => entry.type === 'output')
+    ).map((statistic) => statistic.category?.label),
+    datasets: [
+      {
+        data: groupEntryListByCategory(
+          entryList.value.filter((entry) => entry.type === 'output')
+        ).map((statistic) => statistic.output),
+
+        backgroundColor: [
+          '#ffe4d4',
+          '#ffc5a8',
+          '#ff9c71',
+          '#ff7245',
+          '#fe4111',
+          '#ef2707',
+          '#c61708',
+          '#9d150f',
+          '#7e1510',
+          '#440606'
+        ],
+        borderColor: 'transparent'
+      }
+      // {
+      //   data: statisticListGroupedByCategory.value.map((statistic) => statistic.output),
+      //   backgroundColor: '#ff7245'
+      // }
+    ]
+  }
+  return [input, output]
+})
+
+const pieChartOptions: ChartOptions<'doughnut'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: 70,
+  plugins: {
+    legend: {
+      display: false
+    }
+  }
+}
 </script>
 <template>
   <div class="flex flex-col p-6 space-y-6 grow overflow-y-auto custom-scrollbar">
-    <CChartContainer title="Daily Income And Expense Statement" icon="ph-chart-bar-horizontal">
+    <CChartContainer
+      title="Daily Income And Expense Statement"
+      icon="ph-chart-bar-horizontal"
+      chart-height="h-[16rem]"
+    >
       <Bar id="my-chart-id" :options="barChartOptions" :data="barChartData" class="w-full" />
     </CChartContainer>
     <CDivider></CDivider>
 
-    <CChartContainer title="Daily Income And Expense Statement" icon="ph-wave-sine">
+    <CChartContainer
+      title="Daily Income And Expense Statement"
+      icon="ph-wave-sine"
+      chart-height="h-[16rem]"
+    >
       <Line id="my-chart-id" :options="lineChartOptions" :data="lineChartData" class="w-full" />
     </CChartContainer>
     <CDivider></CDivider>
 
-    <CChartContainer title="Daily Income And Expense Statement" icon="ph-chart-pie">
+    <CChartContainer
+      title="Daily Income And Expense Statement"
+      icon="ph-chart-pie"
+      chart-height="h-[20rem]"
+    >
+      <div class="grid grid-cols-2 items-stretch h-full">
+        <div class="flex items-center justify-center h-full px-36 relative">
+          <Doughnut :options="pieChartOptions" :data="pieChartData[0]"></Doughnut>
+          <p
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yokatta-200 text-xl font-bold"
+          >
+            +12,123
+          </p>
+        </div>
+        <div class="flex items-center justify-center h-full px-36 relative">
+          <Doughnut :options="pieChartOptions" :data="pieChartData[1]"></Doughnut>
+          <p
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-guilty-400 text-xl font-bold"
+          >
+            -12,123
+          </p>
+        </div>
+      </div>
     </CChartContainer>
   </div>
 </template>

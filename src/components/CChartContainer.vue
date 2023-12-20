@@ -5,7 +5,7 @@ import CTabRadio, { type TabOption } from './CTabRadio.vue'
 import CButton from './CButton.vue'
 import CDivider from './CDivider.vue'
 
-defineProps<{ title: string; icon: string }>()
+defineProps<{ title: string; icon: string; chartHeight: string }>()
 
 const tabOptions: TabOption<number>[] = [
   { label: '1W', value: 7 },
@@ -66,7 +66,7 @@ const toggleFullScreen = () => {
       </div>
     </div>
 
-    <div class="h-[16rem]" v-if="showChart">
+    <div :class="chartHeight" v-if="showChart">
       <slot></slot>
     </div>
   </div>
