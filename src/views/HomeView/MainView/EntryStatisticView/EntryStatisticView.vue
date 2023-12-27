@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, type ComputedRef } from 'vue'
+
 import { storeToRefs } from 'pinia'
 import {
   Chart,
@@ -13,7 +14,6 @@ import {
   ArcElement,
   Legend,
   type ChartData,
-  type ChartArea,
   type ChartOptions
 } from 'chart.js'
 import { Bar, Line, Doughnut } from 'vue-chartjs'
@@ -23,7 +23,10 @@ import CDivider from '@/components/CDivider.vue'
 import CChartContainer from '@/components/CChartContainer.vue'
 
 import { useEntryStore } from '@/stores/entry'
+
 import type { EntryWithCategory } from '@/types/entry'
+
+import { getGradient } from '@/utils/getGradient'
 
 Chart.register(
   Tooltip,
@@ -73,15 +76,61 @@ const barChartData: ComputedRef<ChartData<'bar'>> = computed(() => {
     datasets: [
       {
         data: statisticListGroupedByDate.value.map((statistic) => statistic.input),
-        backgroundColor: '#c5dcf8',
-        barPercentage: 0.2,
-        minBarLength: 5
+        barPercentage: 0.5,
+        minBarLength: 5,
+
+        borderWidth: 2,
+        borderColor: 'rgba(157, 198, 243, 1)',
+
+        backgroundColor: (ctx) => {
+          const chart = ctx.chart
+          const { ctx: chartCtx, chartArea } = chart
+          if (!chartArea) {
+            // This case happens on initial chart load
+            return
+          }
+          return getGradient({
+            ctx: chartCtx,
+
+            position: { x0: 0, x1: 0, y0: chartArea.top, y1: chartArea.bottom },
+            colorStopOptions: [
+              { offset: 0, color: 'rgba(157, 198, 243, 0.6)' },
+              { offset: 1, color: 'rgba(157, 198, 243, 0.2)' }
+            ]
+          })
+        }
       },
       {
         data: statisticListGroupedByDate.value.map((statistic) => statistic.output),
-        backgroundColor: '#ff7245',
-        barPercentage: 0.2,
-        minBarLength: 5
+        barPercentage: 0.5,
+        minBarLength: 5,
+
+        borderWidth: 2,
+        borderColor: 'rgba(255,114,69, 1)',
+
+        backgroundColor: (ctx) => {
+          const chart = ctx.chart
+          const { ctx: chartCtx, chartArea } = chart
+          if (!chartArea) {
+            // This case happens on initial chart load
+            return
+          }
+          return getGradient({
+            ctx: chartCtx,
+
+            position: { x0: 0, x1: 0, y0: chartArea.top, y1: chartArea.bottom },
+            colorStopOptions: [
+              {
+                offset: 0,
+                color: 'rgba(255, 114, 69, 0.6)'
+              },
+              {
+                offset: 1,
+                color: 'rgba(255, 114, 69, 0.2)'
+              }
+            ]
+          })
+        }
       }
     ]
   }
@@ -133,15 +182,19 @@ const lineChartData: ComputedRef<ChartData<'line'>> = computed(() => {
             // This case happens on initial chart load
             return
           }
-          return getGradient(
-            chartCtx,
-            chartArea,
-            'rgba(157, 198, 243, 0.8)',
-            'rgba(157, 198, 243, 0.1)'
-          )
+          return getGradient({
+            ctx: chartCtx,
+            position: { x0: 0, x1: 0, y0: chartArea.top, y1: chartArea.bottom },
+            colorStopOptions: [
+              { offset: 0, color: 'rgba(157, 198, 243, 0.8)' },
+              { offset: 0.4, color: 'rgba(157, 198, 243, 0.3)' },
+              { offset: 1, color: 'rgba(157, 198, 243, 0)' }
+            ]
+          })
         },
         fill: true
       },
+
       {
         data: statisticListGroupedByDate.value.map((statistic) => statistic.output),
         borderColor: '#ff7245',
@@ -153,12 +206,21 @@ const lineChartData: ComputedRef<ChartData<'line'>> = computed(() => {
             // This case happens on initial chart load
             return
           }
-          return getGradient(
-            chartCtx,
-            chartArea,
-            'rgba(255, 114, 69, 0.8)',
-            'rgba(255, 114, 69, 0.1)'
-          )
+          return getGradient({
+            ctx: chartCtx,
+            position: { x0: 0, x1: 0, y0: chartArea.top, y1: chartArea.bottom },
+            colorStopOptions: [
+              {
+                offset: 0,
+                color: 'rgba(255, 114, 69, 0.8)'
+              },
+              {
+                offset: 0.4,
+                color: 'rgba(255, 114, 69, 0.3)'
+              },
+              { offset: 1, color: 'rgba(255, 114, 69, 0)' }
+            ]
+          })
         },
         fill: true
       }
@@ -185,25 +247,6 @@ const lineChartOptions: ChartOptions<'line'> = {
       display: false
     }
   }
-}
-
-const getGradient = (
-  ctx: CanvasRenderingContext2D,
-  chartArea: ChartArea,
-  beginColor: string,
-  endColor: string
-) => {
-  let width, height, gradient
-  const chartWidth = chartArea.right - chartArea.left
-  const chartHeight = chartArea.bottom - chartArea.top
-  if (!gradient || width !== chartWidth || height !== chartHeight) {
-    width = chartWidth
-    height = chartHeight
-    gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
-    gradient.addColorStop(0, beginColor)
-    gradient.addColorStop(0.8, endColor)
-  }
-  return gradient
 }
 
 const groupEntryListByCategory = (list: EntryWithCategory[]) => {
