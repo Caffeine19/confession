@@ -47,7 +47,7 @@ onMounted(() => {
 })
 
 const entryStore = useEntryStore()
-const { selectedEntry } = storeToRefs(entryStore)
+const { selectedEntry, entryQueryOptions } = storeToRefs(entryStore)
 
 //交易类型
 const entryType = ref<EntryType>('output')
@@ -105,7 +105,7 @@ const onSubmitButtonClick = async () => {
         property: selectedProperty.value.id,
         remark: remark.value
       })
-      entryStore.getEntryList()
+      entryStore.getEntryList(entryQueryOptions.value)
 
       //反转上一次的结果
       const [{ amount: UpdatedAmount }] = await propertyStore.updatePropertyAmount({
@@ -138,7 +138,7 @@ const onSubmitButtonClick = async () => {
         property: selectedProperty.value.id,
         remark: remark.value
       })
-      entryStore.getEntryList()
+      entryStore.getEntryList(entryQueryOptions.value)
 
       await propertyStore.updatePropertyAmount({
         id: selectedProperty.value.id,
@@ -210,7 +210,7 @@ const onDeleteButtonClick = async () => {
 
   try {
     await entryStore.deleteEntry(selectedEntry.value.id)
-    entryStore.getEntryList()
+    entryStore.getEntryList(entryQueryOptions.value)
 
     //删除交易后，需要撤销交易对应的资产的金额
     await propertyStore.updatePropertyAmount({

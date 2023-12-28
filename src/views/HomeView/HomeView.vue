@@ -17,10 +17,24 @@ import { useEntryStore } from '@/stores/entry'
 
 import type { EntryWithCategory } from '@/types/entry'
 
+import { useInjectMessenger } from '@/hooks/useMessenger'
+
 const entryStore = useEntryStore()
-const { groupedEntryListByDate } = storeToRefs(entryStore)
+const { groupedEntryListByDate, entryQueryOptions } = storeToRefs(entryStore)
+
+const { showMessenger } = useInjectMessenger()
+
+const getEntryList = async () => {
+  try {
+    await entryStore.getEntryList(entryQueryOptions.value)
+  } catch (error) {
+    console.log('🚀 ~ file: HomeView.vue:31 ~ getEntryList ~ error:', error)
+    showMessenger({ status: false, text: (error as Error).message })
+  }
+}
+
 onMounted(() => {
-  entryStore.getEntryList()
+  getEntryList()
 })
 
 const router = useRouter()

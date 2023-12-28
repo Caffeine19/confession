@@ -9,11 +9,27 @@ import type { DateGroupedEntryList, Entry, EntryWithCategory } from '@/types/ent
 
 export const useEntryStore = defineStore('entry', () => {
   const entryList = ref<EntryWithCategory[]>([])
-  const getEntryList = async () => {
-    const { data } = await supabase
-      .from('entry')
-      .select(`id,created_at,amount,type,property,remark,category (label,icon,id)`)
-    entryList.value = data || []
+  const entryQueryOptions = ref<{ begin: string; end: string }>({
+    begin: '2023-01-01',
+    end: '2023-12-29'
+  })
+  const getEntryList = async ({ begin, end }: { begin: string; end: string }) => {
+    try {
+      const { data, error } = await supabase
+        .from('entry')
+        .select(`id,created_at,amount,type,property,remark,category (label,icon,id)`)
+        .gte('created_at', begin)
+        .lte('created_at', end)
+      if (error) {
+        console.log('🚀 ~ file: entry.ts:19 ~ getEntryList ~ error:', error)
+        const { code, message } = error
+        throw new Error(code + '~' + message)
+      }
+      entryList.value = data || []
+    } catch (error) {
+      console.log('🚀 ~ file: entry.ts:26 ~ getEntryList ~ error:', error)
+      throw error
+    }
   }
 
   //write by chatgpt,thanks
@@ -107,6 +123,7 @@ export const useEntryStore = defineStore('entry', () => {
 
   return {
     entryList,
+    entryQueryOptions,
     getEntryList,
     groupedEntryListByDate,
     selectedEntry,
