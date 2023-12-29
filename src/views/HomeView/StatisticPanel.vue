@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-
 import CDivider from '@/components/CDivider.vue'
 
-const statisticOptions = ref([
-  { label: 'Expense', value: 4710.27 },
-  { label: 'Income', value: 1232.39 },
-  { label: 'Saving', value: 281.27 }
-])
+export interface StatisticOption {
+  label: string
+  value: number
+}
+
+defineProps<{ statisticOptions: StatisticOption[] }>()
 </script>
 <template>
   <div class="flex items-stretch rounded-lg px-6 py-3 space-x-4 dark:bg-cookie-200">

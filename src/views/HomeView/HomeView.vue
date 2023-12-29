@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, type ComputedRef } from 'vue'
 
 import { RouterView, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -11,7 +11,7 @@ import CDateInput from '@/components/CDateInput.vue'
 
 import TopBar from './TopBar.vue'
 import RouteTabGroup from './RouteTabGroup.vue'
-import StatisticPanel from './StatisticPanel.vue'
+import StatisticPanel, { type StatisticOption } from './StatisticPanel.vue'
 
 import { useEntryStore } from '@/stores/entry'
 
@@ -20,22 +20,18 @@ import type { EntryWithCategory } from '@/types/entry'
 import { useInjectMessenger } from '@/hooks/useMessenger'
 
 const entryStore = useEntryStore()
-const { groupedEntryListByDate, entryQueryOptions } = storeToRefs(entryStore)
+const { groupedEntryListByDate, entryQueryOptions, incomeAndExpenseSummary } =
+  storeToRefs(entryStore)
 
 const { showMessenger } = useInjectMessenger()
 
-const getEntryList = async () => {
+onMounted(async () => {
   try {
     await entryStore.getEntryList(entryQueryOptions.value)
   } catch (error) {
     console.log('🚀 ~ file: HomeView.vue:31 ~ getEntryList ~ error:', error)
     showMessenger({ status: false, text: (error as Error).message })
   }
-}
-
-onMounted(() => {
-  getEntryList()
-  entryStore.getIncomeExpenseSummary(entryQueryOptions.value)
 })
 
 const router = useRouter()
@@ -45,6 +41,14 @@ const goToEntryDetail = (entry?: EntryWithCategory) => {
 }
 
 const searchDate = ref('')
+
+const incomeAndExpenseStatisticOptions: ComputedRef<StatisticOption[]> = computed(() => [
+  { label: 'Income', value: incomeAndExpenseSummary.value.income },
+  { label: 'Expense', value: incomeAndExpenseSummary.value.expense },
+  { label: 'Saving', value: incomeAndExpenseSummary.value.saving }
+])
+
+onMounted(() => entryStore.getIncomeAndExpenseSummary(entryQueryOptions.value))
 </script>
 
 <template>
@@ -56,7 +60,7 @@ const searchDate = ref('')
       <div
         class="p-6 border-r dark:border-neutral-800 space-y-4 flex flex-col items-stretch overflow-hidden shrink-0"
       >
-        <StatisticPanel></StatisticPanel>
+        <StatisticPanel :statistic-options="incomeAndExpenseStatisticOptions"></StatisticPanel>
         <CDivider></CDivider>
 
         <div class="flex items-center justify-between space-x-4">

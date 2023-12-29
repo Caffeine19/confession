@@ -5,7 +5,7 @@ import { computed, ref, type ComputedRef } from 'vue'
 import dayjs from 'dayjs'
 import { supabase } from '@/lib/supabaseClient'
 
-import type { DateGroupedEntryList, Entry, EntryWithCategory } from '@/types/entry'
+import type { DateGroupedEntryList, Entry, EntryWithCategory, EntryType } from '@/types/entry'
 
 export const useEntryStore = defineStore('entry', () => {
   const entryList = ref<EntryWithCategory[]>([])
@@ -58,21 +58,38 @@ export const useEntryStore = defineStore('entry', () => {
     )
   })
 
-  const getIncomeExpenseSummary = async ({ begin, end }: { begin: string; end: string }) => {
-    try {
-      const { data, error } = await supabase.rpc('get_summary', {
+  const incomeAndExpenseSummary = ref<{ income: number; expense: number; saving: number }>({
+    income: 0,
+    expense: 0,
+    saving: 0
+  })
+  const getIncomeAndExpenseSummary = async ({ begin, end }: { begin: string; end: string }) => {
+    const task = (type: EntryType) =>
+      supabase.rpc('get_summary', {
         begin_date: begin,
         end_date: end,
-        summary_type: 'input'
+        summary_type: type
       })
 
-      if (error) {
-        console.log('🚀 ~ file: entry.ts:45 ~ getIncomeExpenseSummary ~ error:', error)
-        const { code, message } = error
+    try {
+      const [inputRes, outputRes] = await Promise.all([task('input'), task('output')])
+
+      if (inputRes.error) {
+        const { code, message } = inputRes.error
         throw new Error(code + '~' + message)
       }
+      if (outputRes.error) {
+        const { code, message } = outputRes.error
+        throw new Error(code + '~' + message)
+      }
+
+      incomeAndExpenseSummary.value = {
+        income: inputRes.data,
+        expense: outputRes.data,
+        saving: inputRes.data - outputRes.data
+      }
     } catch (error) {
-      console.log('🚀 ~ file: entry.ts:49 ~ getIncomeExpenseSummary ~ error:', error)
+      console.log('🚀 ~ file: entry.ts:76 ~ getIncomeExpenseSummary ~ error:', error)
       throw error
     }
   }
@@ -146,7 +163,8 @@ export const useEntryStore = defineStore('entry', () => {
     getEntryList,
     groupedEntryListByDate,
 
-    getIncomeExpenseSummary,
+    incomeAndExpenseSummary,
+    getIncomeAndExpenseSummary,
 
     selectedEntry,
     setSelectedEntry,
