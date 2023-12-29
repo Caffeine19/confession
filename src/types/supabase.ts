@@ -101,7 +101,23 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_summary:
+        | {
+            Args: {
+              begin_date: string
+              end_date: string
+              entry_type: string
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              begin_date: string
+              end_date: string
+              summary_type: Database['public']['Enums']['entry_type']
+            }
+            Returns: number
+          }
     }
     Enums: {
       entry_type: 'input' | 'output' | 'transfer'

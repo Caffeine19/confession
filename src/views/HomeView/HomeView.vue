@@ -35,6 +35,7 @@ const getEntryList = async () => {
 
 onMounted(() => {
   getEntryList()
+  entryStore.getIncomeExpenseSummary(entryQueryOptions.value)
 })
 
 const router = useRouter()

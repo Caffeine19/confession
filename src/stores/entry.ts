@@ -58,6 +58,25 @@ export const useEntryStore = defineStore('entry', () => {
     )
   })
 
+  const getIncomeExpenseSummary = async ({ begin, end }: { begin: string; end: string }) => {
+    try {
+      const { data, error } = await supabase.rpc('get_summary', {
+        begin_date: begin,
+        end_date: end,
+        summary_type: 'input'
+      })
+
+      if (error) {
+        console.log('🚀 ~ file: entry.ts:45 ~ getIncomeExpenseSummary ~ error:', error)
+        const { code, message } = error
+        throw new Error(code + '~' + message)
+      }
+    } catch (error) {
+      console.log('🚀 ~ file: entry.ts:49 ~ getIncomeExpenseSummary ~ error:', error)
+      throw error
+    }
+  }
+
   const selectedEntry = ref<EntryWithCategory | undefined>()
   const setSelectedEntry = (entry: EntryWithCategory | undefined) => {
     selectedEntry.value = entry
@@ -126,8 +145,12 @@ export const useEntryStore = defineStore('entry', () => {
     entryQueryOptions,
     getEntryList,
     groupedEntryListByDate,
+
+    getIncomeExpenseSummary,
+
     selectedEntry,
     setSelectedEntry,
+
     createEntry,
     deleteEntry,
     updateEntry
