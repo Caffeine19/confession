@@ -3,7 +3,7 @@ import CDivider from '@/components/CDivider.vue'
 
 export interface StatisticOption {
   label: string
-  value: number
+  value: string
 }
 
 defineProps<{ statisticOptions: StatisticOption[] }>()

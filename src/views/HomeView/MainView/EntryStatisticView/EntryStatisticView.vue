@@ -27,6 +27,7 @@ import { useEntryStore } from '@/stores/entry'
 import type { EntryWithCategory } from '@/types/entry'
 
 import { getGradient } from '@/utils/getGradient'
+import { addThousandsSeparator } from '@/utils/addThousandsSeparator'
 
 Chart.register(
   Tooltip,
@@ -41,7 +42,7 @@ Chart.register(
 )
 
 const entryStore = useEntryStore()
-const { groupedEntryListByDate, entryList } = storeToRefs(entryStore)
+const { groupedEntryListByDate, entryList, incomeAndExpenseSummary } = storeToRefs(entryStore)
 
 //helped by chatgpt,thanks
 const statisticListGroupedByDate = computed(() => {
@@ -381,7 +382,7 @@ const pieChartOptions: ChartOptions<'doughnut'> = {
           <p
             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yokatta-200 text-xl font-bold"
           >
-            +12,123
+            +{{ addThousandsSeparator(incomeAndExpenseSummary.income) }}
           </p>
         </div>
         <div class="flex items-center justify-center h-full px-36 relative">
@@ -389,7 +390,7 @@ const pieChartOptions: ChartOptions<'doughnut'> = {
           <p
             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-guilty-400 text-xl font-bold"
           >
-            -12,123
+            -{{ addThousandsSeparator(incomeAndExpenseSummary.expense) }}
           </p>
         </div>
       </div>
