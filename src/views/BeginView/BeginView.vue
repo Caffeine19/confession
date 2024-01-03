@@ -3,6 +3,8 @@ import { ref } from 'vue'
 
 import { useRouter } from 'vue-router'
 
+import { storeToRefs } from 'pinia'
+
 import CInput from '@/components/CInput.vue'
 import CButton from '@/components/CButton.vue'
 import CTabRadio, { type TabOption } from '@/components/CTabRadio.vue'
@@ -12,6 +14,7 @@ import { useUserStore } from '@/stores/user'
 import { useInjectMessenger } from '@/hooks/useMessenger'
 
 const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
 
 const { showMessenger } = useInjectMessenger()
 
@@ -24,8 +27,8 @@ const beginTypeOptions: TabOption<BeginType>[] = [
   { label: 'Login', value: 'login' }
 ]
 
-const username = ref('')
-const email = ref('')
+const username = ref(user.value?.aud || '')
+const email = ref(user.value?.email || '')
 const password = ref('')
 
 const onSubmitButtonClick = async () => {
@@ -33,6 +36,14 @@ const onSubmitButtonClick = async () => {
     try {
       await userStore.login({ password: password.value, email: email.value })
       showMessenger({ status: true, text: 'login successfully' })
+      setTimeout(() => router.push({ name: 'home' }), 1500)
+    } catch (error) {
+      showMessenger({ status: false, text: (error as Error).message })
+    }
+  } else if (beginType.value === 'register') {
+    try {
+      await userStore.register({ password: password.value, email: email.value })
+      showMessenger({ status: true, text: 'register successfully' })
       setTimeout(() => router.push({ name: 'home' }), 1500)
     } catch (error) {
       showMessenger({ status: false, text: (error as Error).message })
@@ -57,12 +68,12 @@ const onSubmitButtonClick = async () => {
 
       <div class="flex flex-col space-y-6">
         <CInput v-model:value="email" icon="ph-envelope" placeholder="Email"></CInput>
-        <CInput
+        <!-- <CInput
           v-model:value="username"
           icon="ph-user-circle"
           placeholder="Username"
           v-if="beginType === 'register'"
-        ></CInput>
+        ></CInput> -->
         <CInput v-model:value="password" icon="ph-key" placeholder="Password"></CInput>
         <a class="text-sm dark:text-cookie-200 text-center">Forget your password?</a>
         <CButton

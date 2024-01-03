@@ -1,48 +1,69 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 
-interface RouteTab {
-  icon: string
-  label: string
-}
-const routeTabOptions = reactive<RouteTab[]>([
+import { useRouter } from 'vue-router'
+
+import RouteTab, { type RouteTabProps } from './RouteTab.vue'
+
+import { useUserStore } from '@/stores/user'
+
+const router = useRouter()
+
+const userStore = useUserStore()
+
+const routeTabOptions = reactive<RouteTabProps[]>([
   {
     icon: 'ph-bank',
-    label: 'Home'
+    label: 'Home',
+    action: () => router.push({ name: 'home' })
   },
   {
     icon: 'ph-cardholder',
-    label: 'Property'
+    label: 'Property',
+
+    action: () => router.push({ name: 'home' })
   },
 
   {
     icon: 'ph-map-trifold',
-    label: 'Budget'
+    label: 'Budget',
+
+    action: () => router.push({ name: 'home' })
   },
 
   {
     icon: 'ph-swatches',
-    label: 'Category'
+    label: 'Category',
+
+    action: () => router.push({ name: 'home' })
   }
 ])
+
+const signOutTabOption: RouteTabProps = {
+  icon: 'ph-door',
+  label: 'SignOut',
+  action: async () => {
+    await userStore.signOut()
+    router.replace({ name: 'begin' })
+  }
+}
 </script>
 <template>
-  <div class="p-6 border-r dark:border-neutral-800 space-y-6">
-    <button
-      v-for="(tab, index) in routeTabOptions"
-      :key="index"
-      class="flex rounded-full items-center space-x-3 px-4 py-2 group transition-colors dark:hover:bg-neutral-900 bg-transparent w-full"
-    >
-      <i
-        class="ph dark:group-hover:text-neutral-300 dark:text-neutral-400 transition-colors"
-        :class="tab.icon"
-        style="font-size: 28px"
-      ></i>
-      <p
-        class="dark:text-neutral-400 text-lg font-normal dark:group-hover:text-neutral-300 transition-colors"
-      >
-        {{ tab.label }}
-      </p>
-    </button>
+  <div class="p-6 border-r dark:border-neutral-800 flex flex-col justify-between">
+    <div class="space-y-6">
+      <RouteTab
+        v-for="(routeTabOption, index) in routeTabOptions"
+        :key="index"
+        :icon="routeTabOption.icon"
+        :label="routeTabOption.label"
+        :action="routeTabOption.action"
+      ></RouteTab>
+    </div>
+
+    <RouteTab
+      :icon="signOutTabOption.icon"
+      :label="signOutTabOption.label"
+      :action="signOutTabOption.action"
+    ></RouteTab>
   </div>
 </template>

@@ -20,8 +20,6 @@ import type { EntryWithCategory } from '@/types/entry'
 
 import { useInjectMessenger } from '@/hooks/useMessenger'
 
-import { addThousandsSeparator } from '@/utils/addThousandsSeparator'
-
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 
@@ -50,9 +48,9 @@ const goToEntryDetail = (entry?: EntryWithCategory) => {
 const searchDate = ref('')
 
 const incomeAndExpenseStatisticOptions: ComputedRef<StatisticOption[]> = computed(() => [
-  { label: 'Income', value: addThousandsSeparator(incomeAndExpenseSummary.value.income) },
-  { label: 'Expense', value: addThousandsSeparator(incomeAndExpenseSummary.value.expense) },
-  { label: 'Saving', value: addThousandsSeparator(incomeAndExpenseSummary.value.saving) }
+  { label: 'Income', value: (incomeAndExpenseSummary.value.income / 100).toLocaleString() },
+  { label: 'Expense', value: (incomeAndExpenseSummary.value.expense / 100).toLocaleString() },
+  { label: 'Saving', value: (incomeAndExpenseSummary.value.saving / 100).toLocaleString() }
 ])
 
 onMounted(() => entryStore.getIncomeAndExpenseSummary(entryQueryOptions.value))
