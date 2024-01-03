@@ -19,6 +19,7 @@ import type { Category } from '@/types/category'
 
 import { useCategoryStore } from '@/stores/category'
 import { useEntryStore } from '@/stores/entry'
+import { useUserStore } from '@/stores/user'
 
 import { useInjectMessenger } from '@/hooks/useMessenger'
 import type { Property } from '@/types/property'
@@ -48,6 +49,9 @@ onMounted(() => {
 
 const entryStore = useEntryStore()
 const { selectedEntry, entryQueryOptions } = storeToRefs(entryStore)
+
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
 
 //交易类型
 const entryType = ref<EntryType>('output')
@@ -98,18 +102,18 @@ const onSubmitButtonClick = async () => {
       await entryStore.updateEntry({
         id: selectedEntry.value.id,
 
-        category: selectedCategory.value.id,
+        category_id: selectedCategory.value.id,
         amount: Number(calculatedAmount.value) * 100,
         created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
         type: entryType.value,
-        property: selectedProperty.value.id,
+        property_id: selectedProperty.value.id,
         remark: remark.value
       })
       entryStore.getEntryList(entryQueryOptions.value)
 
       //反转上一次的结果
       const [{ amount: UpdatedAmount }] = await propertyStore.updatePropertyAmount({
-        id: selectedEntry.value.property,
+        id: selectedEntry.value.property_id,
         oldAmount: selectedProperty.value.amount,
         changedAmount: selectedEntry.value.amount,
         type: selectedEntry.value.type === 'input' ? 'output' : 'input'
@@ -121,7 +125,7 @@ const onSubmitButtonClick = async () => {
 
         //如果选择的资产和上一次的资产相同，那么就用修改反转后的上次资产的金额，否则就用现在新选中的资产的金额
         oldAmount:
-          selectedEntry.value.property === selectedProperty.value.id
+          selectedEntry.value.property_id === selectedProperty.value.id
             ? UpdatedAmount
             : selectedProperty.value.amount,
 
@@ -130,13 +134,16 @@ const onSubmitButtonClick = async () => {
       })
       propertyStore.getPropertyList()
     } else {
+      if (!user.value?.id) return
+
       await entryStore.createEntry({
-        category: selectedCategory.value.id,
+        category_id: selectedCategory.value.id,
         amount: Number(calculatedAmount.value) * 100,
         created_at: dayjs(createTime.value).format('YYYY-MM-DD'),
         type: entryType.value,
-        property: selectedProperty.value.id,
-        remark: remark.value
+        property_id: selectedProperty.value.id,
+        remark: remark.value,
+        user_id: user.value?.id
       })
       entryStore.getEntryList(entryQueryOptions.value)
 
@@ -169,7 +176,7 @@ const setEntryDetail = () => {
     (category) => category.id === selectedEntry.value?.category?.id
   )
   selectedProperty.value = propertyList.value.find(
-    (property) => property.id === selectedEntry.value?.property
+    (property) => property.id === selectedEntry.value?.property_id
   )
   amount.value = (selectedEntry.value.amount / 100).toString()
   calculatedAmount.value = (selectedEntry.value.amount / 100).toString()
@@ -214,7 +221,7 @@ const onDeleteButtonClick = async () => {
 
     //删除交易后，需要撤销交易对应的资产的金额
     await propertyStore.updatePropertyAmount({
-      id: selectedEntry.value.property,
+      id: selectedEntry.value.property_id,
       oldAmount: selectedProperty.value.amount,
       changedAmount: selectedEntry.value.amount,
       type: selectedEntry.value.type === 'input' ? 'output' : 'input'

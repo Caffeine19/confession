@@ -5,7 +5,7 @@ export type EntryType = Database['public']['Enums']['entry_type']
 
 export type Entry = Database['public']['Tables']['entry']['Row']
 
-export type EntryWithCategory = Omit<Entry, 'category'> & {
+export type EntryWithCategory = Omit<Entry, 'category_id'> & {
   category: Pick<Category, 'label' | 'icon' | 'id'> | null
 }
 

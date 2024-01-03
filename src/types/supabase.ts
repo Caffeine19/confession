@@ -10,6 +10,7 @@ export interface Database {
           id: number
           label: string
           type: Database['public']['Enums']['entry_type'] | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -17,6 +18,7 @@ export interface Database {
           id?: number
           label?: string
           type?: Database['public']['Enums']['entry_type'] | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -24,50 +26,69 @@ export interface Database {
           id?: number
           label?: string
           type?: Database['public']['Enums']['entry_type'] | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'category_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
       }
       entry: {
         Row: {
           amount: number
-          category: number | null
+          category_id: number | null
           created_at: string
           id: number
-          property: number
+          property_id: number
           remark: string | null
           type: Database['public']['Enums']['entry_type']
+          user_id: string | null
         }
         Insert: {
           amount: number
-          category?: number | null
+          category_id?: number | null
           created_at?: string
           id?: number
-          property: number
+          property_id: number
           remark?: string | null
           type: Database['public']['Enums']['entry_type']
+          user_id?: string | null
         }
         Update: {
           amount?: number
-          category?: number | null
+          category_id?: number | null
           created_at?: string
           id?: number
-          property?: number
+          property_id?: number
           remark?: string | null
           type?: Database['public']['Enums']['entry_type']
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'entry_category_fkey'
-            columns: ['category']
+            foreignKeyName: 'entry_category_id_fkey'
+            columns: ['category_id']
             isOneToOne: false
             referencedRelation: 'category'
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'entry_property_fkey'
-            columns: ['property']
+            foreignKeyName: 'entry_property_id_fkey'
+            columns: ['property_id']
             isOneToOne: false
             referencedRelation: 'property'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
             referencedColumns: ['id']
           }
         ]
@@ -79,6 +100,7 @@ export interface Database {
           id: number
           label: string
           type: Database['public']['Enums']['property_type']
+          user_id: string | null
         }
         Insert: {
           amount?: number
@@ -86,6 +108,7 @@ export interface Database {
           id?: number
           label: string
           type?: Database['public']['Enums']['property_type']
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -93,8 +116,17 @@ export interface Database {
           id?: number
           label?: string
           type?: Database['public']['Enums']['property_type']
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'property_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
     Views: {

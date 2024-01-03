@@ -17,7 +17,7 @@ export const useEntryStore = defineStore('entry', () => {
     try {
       const { data, error } = await supabase
         .from('entry')
-        .select(`id,created_at,amount,type,property,remark,category (label,icon,id)`)
+        .select(`id,created_at,amount,type,property_id,user_id,remark,category (label,icon,id)`)
         .gte('created_at', begin)
         .lte('created_at', end)
       if (error) {
@@ -100,7 +100,10 @@ export const useEntryStore = defineStore('entry', () => {
   }
 
   const createEntry = async (
-    params: Pick<Entry, 'amount' | 'category' | 'property' | 'type' | 'created_at' | 'remark'>
+    params: Pick<
+      Entry,
+      'amount' | 'category_id' | 'property_id' | 'type' | 'created_at' | 'remark' | 'user_id'
+    >
   ) => {
     try {
       const res = await supabase.from('entry').insert(params)
@@ -134,16 +137,19 @@ export const useEntryStore = defineStore('entry', () => {
   const updateEntry = async ({
     amount,
     remark,
-    category,
-    property,
+    category_id,
+    property_id,
     type,
     created_at,
     id
-  }: Pick<Entry, 'id' | 'amount' | 'remark' | 'category' | 'property' | 'type' | 'created_at'>) => {
+  }: Pick<
+    Entry,
+    'id' | 'amount' | 'remark' | 'category_id' | 'property_id' | 'type' | 'created_at'
+  >) => {
     try {
       const res = await supabase
         .from('entry')
-        .update({ amount, remark, category, property, type, created_at })
+        .update({ amount, remark, category_id, property_id, type, created_at })
         .match({ id })
       console.log('🚀 ~ file: entry.ts:91 ~ useEntryStore ~ res:', res)
       const { error } = res
