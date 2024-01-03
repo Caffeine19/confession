@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="U">
 import { ref, computed, toRefs } from 'vue'
 
 export interface TabOption<T> {
@@ -7,12 +7,12 @@ export interface TabOption<T> {
 }
 
 const props = defineProps<{
-  tabOptions: TabOption<string | number | boolean>[]
-  value: TabOption<string | number | boolean>['value']
+  tabOptions: TabOption<U>[]
+  value: TabOption<U>['value']
 }>()
 const { tabOptions, value } = toRefs(props)
 
-defineEmits<{ 'update:value': [newVal: TabOption<string | number | boolean>['value']] }>()
+defineEmits<{ 'update:value': [newVal: TabOption<U>['value']] }>()
 
 const tabRef = ref<null | HTMLElement[]>(null)
 
