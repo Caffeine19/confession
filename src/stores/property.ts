@@ -2,14 +2,15 @@ import { defineStore } from 'pinia'
 import { ref, type ComputedRef, computed } from 'vue'
 
 import type { Property, TypeGroupedPropertyList } from '@/types/property'
+import type { User } from '@/types/user'
 import type { Entry } from '@/types/entry'
 
 import { supabase } from '@/lib/supabaseClient'
 
 export const usePropertyStore = defineStore('property', () => {
   const propertyList = ref<Property[]>([])
-  const getPropertyList = async () => {
-    const { data } = await supabase.from('property').select('*')
+  const getPropertyList = async ({ user_id }: { user_id: User['id'] }) => {
+    const { data } = await supabase.from('property').select('*').eq('user_id', user_id)
     propertyList.value = data || []
   }
 

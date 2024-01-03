@@ -15,6 +15,8 @@ export const useUserStore = defineStore('user', () => {
       const { message } = error
       throw new Error(message)
     }
+
+    user.value = data.user
   }
 
   return { user, login }

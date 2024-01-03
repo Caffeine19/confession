@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import { supabase } from '@/lib/supabaseClient'
 
 import type { DateGroupedEntryList, Entry, EntryWithCategory, EntryType } from '@/types/entry'
+import type { User } from '@/types/user'
 
 export const useEntryStore = defineStore('entry', () => {
   const entryList = ref<EntryWithCategory[]>([])
@@ -13,11 +14,20 @@ export const useEntryStore = defineStore('entry', () => {
     begin: '2023-01-01',
     end: '2023-12-29'
   })
-  const getEntryList = async ({ begin, end }: { begin: string; end: string }) => {
+  const getEntryList = async ({
+    begin,
+    end,
+    user_id
+  }: {
+    begin: string
+    end: string
+    user_id: User['id']
+  }) => {
     try {
       const { data, error } = await supabase
         .from('entry')
         .select(`id,created_at,amount,type,property_id,user_id,remark,category (label,icon,id)`)
+        .eq('user_id', user_id)
         .gte('created_at', begin)
         .lte('created_at', end)
       if (error) {

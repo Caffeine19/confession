@@ -14,12 +14,16 @@ import RouteTabGroup from './RouteTabGroup.vue'
 import StatisticPanel, { type StatisticOption } from './StatisticPanel.vue'
 
 import { useEntryStore } from '@/stores/entry'
+import { useUserStore } from '@/stores/user'
 
 import type { EntryWithCategory } from '@/types/entry'
 
 import { useInjectMessenger } from '@/hooks/useMessenger'
 
 import { addThousandsSeparator } from '@/utils/addThousandsSeparator'
+
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
 
 const entryStore = useEntryStore()
 const { groupedEntryListByDate, entryQueryOptions, incomeAndExpenseSummary } =
@@ -29,7 +33,8 @@ const { showMessenger } = useInjectMessenger()
 
 onMounted(async () => {
   try {
-    await entryStore.getEntryList(entryQueryOptions.value)
+    if (!user.value?.id) return
+    await entryStore.getEntryList({ ...entryQueryOptions.value, user_id: user.value.id })
   } catch (error) {
     console.log('🚀 ~ file: HomeView.vue:31 ~ getEntryList ~ error:', error)
     showMessenger({ status: false, text: (error as Error).message })
