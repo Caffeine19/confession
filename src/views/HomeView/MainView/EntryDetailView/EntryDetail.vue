@@ -32,10 +32,14 @@ const goToEntryStatistics = () => {
   router.push({ name: 'entryStatistic' })
 }
 
+const userStore = useUserStore()
+const { user } = storeToRefs(userStore)
+
 const categoryStore = useCategoryStore()
 const { categoryList } = storeToRefs(categoryStore)
 onMounted(() => {
-  categoryStore.getCategoryList()
+  if (!user.value?.id) return
+  categoryStore.getCategoryList({ user_id: user.value.id })
 })
 const categoryListFilteredByEntryType = computed(() => {
   return categoryList.value.filter((category) => category.type === entryType.value)
@@ -44,14 +48,12 @@ const categoryListFilteredByEntryType = computed(() => {
 const propertyStore = usePropertyStore()
 const { groupedPropertyList, propertyList } = storeToRefs(propertyStore)
 onMounted(() => {
-  propertyStore.getPropertyList()
+  if (!user.value?.id) return
+  propertyStore.getPropertyList({ user_id: user.value.id })
 })
 
 const entryStore = useEntryStore()
 const { selectedEntry, entryQueryOptions } = storeToRefs(entryStore)
-
-const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
 
 //交易类型
 const entryType = ref<EntryType>('output')
@@ -86,6 +88,8 @@ const remark = ref('')
 
 const { showMessenger } = useInjectMessenger()
 const onSubmitButtonClick = async () => {
+  if (!user.value?.id) return
+
   try {
     //验证金额的输入是否正确
     if (isExpressionValid.value === false) throw new Error('amount invalid')
@@ -109,7 +113,7 @@ const onSubmitButtonClick = async () => {
         property_id: selectedProperty.value.id,
         remark: remark.value
       })
-      entryStore.getEntryList(entryQueryOptions.value)
+      entryStore.getEntryList({ ...entryQueryOptions.value, user_id: user.value.id })
 
       //反转上一次的结果
       const [{ amount: UpdatedAmount }] = await propertyStore.updatePropertyAmount({
@@ -132,7 +136,7 @@ const onSubmitButtonClick = async () => {
         changedAmount: Number(calculatedAmount.value) * 100,
         type: entryType.value
       })
-      propertyStore.getPropertyList()
+      propertyStore.getPropertyList({ user_id: user.value.id })
     } else {
       if (!user.value?.id) return
 
@@ -145,7 +149,7 @@ const onSubmitButtonClick = async () => {
         remark: remark.value,
         user_id: user.value?.id
       })
-      entryStore.getEntryList(entryQueryOptions.value)
+      entryStore.getEntryList({ ...entryQueryOptions.value, user_id: user.value.id })
 
       await propertyStore.updatePropertyAmount({
         id: selectedProperty.value.id,
@@ -153,7 +157,7 @@ const onSubmitButtonClick = async () => {
         changedAmount: Number(calculatedAmount.value) * 100,
         type: entryType.value
       })
-      propertyStore.getPropertyList()
+      propertyStore.getPropertyList({ user_id: user.value.id })
     }
 
     showMessenger({
@@ -213,11 +217,13 @@ watch(
 )
 
 const onDeleteButtonClick = async () => {
+  if (!user.value?.id) return
+
   if (!selectedEntry.value || !selectedProperty.value) return
 
   try {
     await entryStore.deleteEntry(selectedEntry.value.id)
-    entryStore.getEntryList(entryQueryOptions.value)
+    entryStore.getEntryList({ ...entryQueryOptions.value, user_id: user.value.id })
 
     //删除交易后，需要撤销交易对应的资产的金额
     await propertyStore.updatePropertyAmount({
@@ -226,7 +232,7 @@ const onDeleteButtonClick = async () => {
       changedAmount: selectedEntry.value.amount,
       type: selectedEntry.value.type === 'input' ? 'output' : 'input'
     })
-    propertyStore.getPropertyList()
+    propertyStore.getPropertyList({ user_id: user.value.id })
     resetEntryDetail()
 
     showMessenger({ status: true, text: 'Delete entry successfully' })
